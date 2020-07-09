@@ -45,8 +45,7 @@ df3$Steps <- ifelse(is.na(df3$Value), NA, df3$Steps)
 # now we want to interpolate step counts at minutes when watch was off
 plot_interpolation <- function(df, starttime, endtime, method = "linear", f = NA, maxgap = "none"){
   
-  df3$`Steps Interpolated` <- na.approx(df$Steps, method = method, f = f, maxgap = maxgap)
-  # zoo package function approx()
+  df3$`Steps Interpolated` <- na.approx(df$Steps,  maxgap = maxgap, method = method, f = f)
   
   df3 %>%
     filter(Time > starttime) %>%
@@ -88,7 +87,6 @@ plot_interpolation(df, starttime, endtime, method, f, maxgap)
 maxgap = 60 #minutes
 plot_interpolation(df, starttime, endtime, method, f, maxgap)
 
-<<<<<<< HEAD
 # interpolate method #2: find average steps at time when watch was off from other days
 library(imputeTS)
 plot(df$Steps, type = "l", xlab = "Time", ylab = "Steps", main = "Raw")
@@ -133,8 +131,8 @@ df$StepsInt <- df$Steps
 # find missing data chunks
 find_missing <- function(stepsdata){
   x <- df %>%
-    mutate(missing = ifelse(is.na(stepsdata), missing, 0)) %>%
-    group_by(group = cumsum(c(0, diff(missing) != 0))) %>%
+    dplyr::mutate(missing = ifelse(is.na(stepsdata), 1, 0)) %>%
+    dplyr::group_by(group = cumsum(c(0, diff(missing) != 0))) %>%
     filter(missing == 1 & n() > 1) %>%
     summarize("start_missing"=min(as.character(Time)),
               "end_missing"=max(as.character(Time)),
@@ -152,10 +150,12 @@ find_missing <- function(stepsdata){
 # this shows us the data during the missing period of interest
 i = 1 # looking at first missing period
 
+x <- find_missing(df$StepsInt)
+
 # view missing data period
 df %>%
-  filter(Time > ymd_hms(x$start_missing[i])) %>%
-  filter(Time < ymd_hms(x$end_missing[i]))
+  filter(Time >= ymd_hms(x$start_missing[i])) %>%
+  filter(Time <= ymd_hms(x$end_missing[i]))
 
 # now we want to loop through each missing period, interpolate, update what periods are missing, 
 # and interpolate some more, using the average value from the same time period on other days 
@@ -196,6 +196,23 @@ while (dim(x)[1] > 0) {
     print(paste0("all missing values replaced, ", sum(is.na(df$StepsInt)), " remaining"))
   }
   
+  # make a plot to check that NA periods of interest are being interpolated
+  
+  #library(scales)
+  
+  df %>%
+    select(Time, Steps, StepsInt) %>%
+    melt(id.vars = c("Time")) %>%
+    ggplot() + 
+    geom_point(aes(x = Time, y = value, color = variable)) + 
+    scale_color_brewer(palette = "Set1") +
+    theme_classic() + 
+    xlab("Time") + ylab("Steps") +
+    #scale_x_datetime(labels=date_format("%H:%m"), breaks = date_breaks("1 minute"), expand=c(0,0)) +
+    xlim(c(as.POSIXct(x$start_missing[1], format = "%Y-%m-%d %H:%M:%S"),
+           as.POSIXct(x$end_missing[1], format = "%Y-%m-%d %H:%M:%S")))
+  # to do: figure out how to get these plots to print while in a while loop!
+  
   # check for missing periods and update on each round of interpolation
   x <- find_missing(df$StepsInt)
   print(dim(x)[1])
@@ -203,7 +220,7 @@ while (dim(x)[1] > 0) {
 
 df %>%
   mutate(Date = lubridate::date(Time)) %>%
-  mutate(Hour = lubridate::hour(Time)) %>%
+  mutate(Hour = lubridate::hour(Time)) %>% # change this from hour to hour minute format
   select(Hour, Date, Steps, StepsInt) %>%
   melt(id.vars = c("Hour", "Date")) %>%
   ggplot() + 
@@ -213,22 +230,7 @@ df %>%
   theme_classic() + 
   xlab("Time") + ylab("Steps") +
   ggsave("~/Box/CogNeuroLab/Wearables/results/figures/interpolated_ts_fitbit.png", dpi = 300, width = 15, height = 10, units = "in")
+
 # to do: highlight all missing periods originally found in find_missing function
 x0 <- find_missing(df$Steps)
 
-=======
-
-
-#Practice zone!
-df3$`Steps Interpolated` <- na.approx(df$Steps, method = method, f = f, maxgap = maxgap) ##CHANGE THIS FUNCTION
-# zoo package function approx()
-
-df3 %>%
-  filter(Time > starttime) %>%
-  filter(Time < endtime) %>%
-  pivot_longer(cols = c(Steps, `Steps Interpolated`), names_to = "Key") %>%
-  ggplot() + 
-  geom_line(aes(x = Time, y = value, color = Key), size = 2) + 
-  facet_wrap(. ~ Key) + theme_classic() + theme(legend.position = "none") +
-  ylab("Steps")
->>>>>>> d0f8e5e250aeb2fff451f8d00392bbf53449059a
