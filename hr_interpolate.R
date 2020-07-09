@@ -45,7 +45,8 @@ df3$Steps <- ifelse(is.na(df3$Value), NA, df3$Steps)
 # now we want to interpolate step counts at minutes when watch was off
 plot_interpolation <- function(df, starttime, endtime, method = "linear", f = NA, maxgap = "none"){
   
-  df3$`Steps Interpolated` <- na.approx(df$Steps,  maxgap = maxgap, method = method, f = f)
+  df3$`Steps Interpolated` <- na.approx(df$Steps, method = method, f = f, maxgap = maxgap)
+  # zoo package function approx()
   
   df3 %>%
     filter(Time > starttime) %>%
@@ -87,6 +88,7 @@ plot_interpolation(df, starttime, endtime, method, f, maxgap)
 maxgap = 60 #minutes
 plot_interpolation(df, starttime, endtime, method, f, maxgap)
 
+<<<<<<< HEAD
 # interpolate method #2: find average steps at time when watch was off from other days
 library(imputeTS)
 plot(df$Steps, type = "l", xlab = "Time", ylab = "Steps", main = "Raw")
@@ -214,3 +216,19 @@ df %>%
 # to do: highlight all missing periods originally found in find_missing function
 x0 <- find_missing(df$Steps)
 
+=======
+
+
+#Practice zone!
+df3$`Steps Interpolated` <- na.approx(df$Steps, method = method, f = f, maxgap = maxgap) ##CHANGE THIS FUNCTION
+# zoo package function approx()
+
+df3 %>%
+  filter(Time > starttime) %>%
+  filter(Time < endtime) %>%
+  pivot_longer(cols = c(Steps, `Steps Interpolated`), names_to = "Key") %>%
+  ggplot() + 
+  geom_line(aes(x = Time, y = value, color = Key), size = 2) + 
+  facet_wrap(. ~ Key) + theme_classic() + theme(legend.position = "none") +
+  ylab("Steps")
+>>>>>>> d0f8e5e250aeb2fff451f8d00392bbf53449059a
