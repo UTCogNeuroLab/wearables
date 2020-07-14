@@ -148,14 +148,12 @@ find_missing <- function(stepsdata){
 }
 
 # this shows us the data during the missing period of interest
-i = 1 # looking at first missing period
-
 x <- find_missing(df$StepsInt)
 
 # view missing data period
 df %>%
-  filter(Time >= ymd_hms(x$start_missing[i])) %>%
-  filter(Time <= ymd_hms(x$end_missing[i]))
+  filter(Time >= ymd_hms(x$start_missing[1])) %>%
+  filter(Time <= ymd_hms(x$end_missing[1]))
 
 # now we want to loop through each missing period, interpolate, update what periods are missing, 
 # and interpolate some more, using the average value from the same time period on other days 
@@ -165,6 +163,7 @@ df %>%
 df$StepsInt <- df$Steps
 x <- find_missing(df$StepsInt)
 
+Sys.sleep(0)
 while (dim(x)[1] > 0) {
   # convert start and end times to clocktimes
   startclock=lubridate::hour(x$start_missing[1]) + lubridate::minute(x$start_missing[1])/60
@@ -198,20 +197,24 @@ while (dim(x)[1] > 0) {
   
   # make a plot to check that NA periods of interest are being interpolated
   
-  #library(scales)
-  
-  df %>%
+  x <- data.frame(x, seq_along(start))
+  p <- df %>%
+    filter(Time > ymd_hms(x$start_missing[1]) - as.difftime(5, unit="mins")) %>%
+    filter(Time < ymd_hms(x$end_missing[1]) + as.difftime(5, unit="mins")) %>%
     select(Time, Steps, StepsInt) %>%
     melt(id.vars = c("Time")) %>%
     ggplot() + 
-    geom_point(aes(x = Time, y = value, color = variable)) + 
+    geom_rect(data=x, inherit.aes=FALSE, aes(xmin=ymd_hms(start_missing[1]), xmax=ymd_hms(end_missing[1]), ymin=-Inf,
+                                             ymax=Inf), fill="yellow", alpha=0.02) +
+    geom_line(aes(x = Time, y = value, group = variable, color = variable)) + 
+    facet_wrap(. ~ variable, nrow = 2) +
     scale_color_brewer(palette = "Set1") +
     theme_classic() + 
-    xlab("Time") + ylab("Steps") +
-    #scale_x_datetime(labels=date_format("%H:%m"), breaks = date_breaks("1 minute"), expand=c(0,0)) +
-    xlim(c(as.POSIXct(x$start_missing[1], format = "%Y-%m-%d %H:%M:%S"),
-           as.POSIXct(x$end_missing[1], format = "%Y-%m-%d %H:%M:%S")))
+    xlab("Time") + ylab("Steps") + 
+    ylim(-0.1, max(df$Steps, na.rm = T))
+  
   # to do: figure out how to get these plots to print while in a while loop!
+  print(p)
   
   # check for missing periods and update on each round of interpolation
   x <- find_missing(df$StepsInt)
@@ -220,17 +223,13 @@ while (dim(x)[1] > 0) {
 
 df %>%
   mutate(Date = lubridate::date(Time)) %>%
-  mutate(Hour = lubridate::hour(Time)) %>% # change this from hour to hour minute format
-  select(Hour, Date, Steps, StepsInt) %>%
-  melt(id.vars = c("Hour", "Date")) %>%
+  mutate(Hour = strftime(Time, format="%H:%M:%S")) %>% # change this from hour to hour minute format
+  select(Hour, Date, Time, Steps, StepsInt) %>%
+  melt(id.vars = c("Time", "Hour", "Date")) %>%
   ggplot() + 
-  geom_point(aes(x = Hour, y = value, color = variable, alpha = 0.85)) + 
-  facet_wrap(Date ~ variable) +
+  geom_line(aes(x = Time, y = value, color = variable), na.rm = F) + 
+  facet_wrap(. ~ variable, nrow = 2, scales = "free") +
   scale_color_brewer(palette = "Set1") +
   theme_classic() + 
   xlab("Time") + ylab("Steps") +
   ggsave("~/Box/CogNeuroLab/Wearables/results/figures/interpolated_ts_fitbit.png", dpi = 300, width = 15, height = 10, units = "in")
-
-# to do: highlight all missing periods originally found in find_missing function
-x0 <- find_missing(df$Steps)
-
