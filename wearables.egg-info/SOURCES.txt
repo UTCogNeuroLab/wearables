@@ -1,0 +1,11 @@
+README.md
+setup.py
+wearables/__init__.py
+wearables/fitcosinor.py
+wearables/plotcosinor.py
+wearables/preproc.py
+wearables/readactig.py
+wearables.egg-info/PKG-INFO
+wearables.egg-info/SOURCES.txt
+wearables.egg-info/dependency_links.txt
+wearables.egg-info/top_level.txt
