@@ -49,4 +49,7 @@ def fitcosinor(data, transform='antilogistic'):
 
     paramsdf = pd.DataFrame(params[None], columns =  [['actmin', 'amp', 'alpha', 'beta', 'phi']])
 
-    return paramsdf
+    x = data.index.values
+    y = data['lmaxact'].values
+
+    return paramsdf, x, y
