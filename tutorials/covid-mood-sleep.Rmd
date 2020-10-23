@@ -2,7 +2,10 @@
 title: "Mood, Sleep, and Activities Pre vs Post COVID"
 author: "Sarah Parker, Megan McMahon"
 date: "10/23/2020"
-output: html_document
+output: 
+  html_document:
+    df_print: kable
+
 ---
 
 If you don't already have the pacakges below installed, you can install them using `install.packages(packagename)` in the console.
@@ -14,6 +17,7 @@ library(readr)
 library(tidyverse)
 library(dplyr)
 library(reshape2)
+library(knitr)
 
 # add more libraries here as needed
 ```

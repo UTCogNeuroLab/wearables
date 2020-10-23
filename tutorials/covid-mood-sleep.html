@@ -378,76 +378,939 @@ summary {
   select(Subject, StartDate, matches(&quot;Q.&quot;))
 
 head(d)</code></pre>
-<pre><code>## # A tibble: 6 x 72
-##   Subject StartDate Q2    Q3    Q4    Q5    Q6    Q7    `Q8#1_1_1` `Q8#2_1_1`
-##   &lt;chr&gt;   &lt;chr&gt;     &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;      &lt;chr&gt;     
-## 1 &quot;Subje… &quot;Start D… &quot;Tod… &quot;Wha… &quot;Wha… &quot;How… &quot;Wha… &quot;How… &quot;Please l… &quot;Please l…
-## 2 &quot;{\&quot;Im… &quot;{\&quot;Impo… &quot;{\&quot;… &quot;{\&quot;… &quot;{\&quot;… &quot;{\&quot;… &quot;{\&quot;… &quot;{\&quot;… &quot;{\&quot;Impor… &quot;{\&quot;Impor…
-## 3 &quot;10143&quot; &quot;2020-08… &quot;08/… &quot;22:… &quot;22:… &quot;10&quot;  &quot;7:4… &quot;5&quot;    &lt;NA&gt;       &lt;NA&gt;     
-## 4 &quot;10146&quot; &quot;2020-08… &quot;08/… &quot;23:… &quot;01:… &quot;10&quot;  &quot;07:… &quot;3&quot;   &quot;02:45&quot;    &quot;2&quot;       
-## 5 &quot;10149&quot; &quot;2020-08… &quot;08/… &quot;23:… &quot;23:… &quot;4&quot;   &quot;7:4… &quot;1&quot;   &quot;5:00&quot;     &quot;2&quot;       
-## 6 &quot;10144&quot; &quot;2020-08… &quot;08/… &quot;22:… &quot;22:… &quot;40&quot;  &quot;08:… &quot;0&quot;    &lt;NA&gt;       &lt;NA&gt;     
-## # … with 62 more variables: `Q9#1_1_1` &lt;chr&gt;, `Q9#2_1_1` &lt;chr&gt;,
-## #   `Q10#1_1_1` &lt;chr&gt;, `Q10#2_1_1` &lt;chr&gt;, `Q11#1_1_1` &lt;chr&gt;, `Q11#2_1_1` &lt;chr&gt;,
-## #   `Q12#1_1_1` &lt;chr&gt;, `Q12#2_1_1` &lt;chr&gt;, Q13 &lt;chr&gt;, Q14 &lt;chr&gt;,
-## #   `Q15#1_1` &lt;chr&gt;, `Q15#2_1_1` &lt;chr&gt;, `Q15#2_1_2` &lt;chr&gt;, `Q16#1_1` &lt;chr&gt;,
-## #   `Q16#2_1_1` &lt;chr&gt;, `Q16#2_1_2` &lt;chr&gt;, `Q17#1_1` &lt;chr&gt;, `Q17#2_1_1` &lt;chr&gt;,
-## #   `Q17#2_1_2` &lt;chr&gt;, `Q18#1_1` &lt;chr&gt;, `Q18#2_1_1` &lt;chr&gt;, `Q18#2_1_2` &lt;chr&gt;,
-## #   `Q19#1_1` &lt;chr&gt;, `Q19#2_1_1` &lt;chr&gt;, `Q19#2_1_2` &lt;chr&gt;, Q20 &lt;chr&gt;,
-## #   Q21 &lt;chr&gt;, Q22 &lt;chr&gt;, Q23 &lt;chr&gt;, Q24_5 &lt;chr&gt;, Q25_1 &lt;chr&gt;, Q26_1 &lt;chr&gt;,
-## #   Q27_1 &lt;chr&gt;, Q28 &lt;chr&gt;, Q29 &lt;chr&gt;, Q30 &lt;chr&gt;, Q31 &lt;chr&gt;, Q32 &lt;chr&gt;,
-## #   Q33_1 &lt;chr&gt;, Q33_2 &lt;chr&gt;, Q33_3 &lt;chr&gt;, Q33_4 &lt;chr&gt;, Q33_5 &lt;chr&gt;,
-## #   Q33_6 &lt;chr&gt;, Q33_7 &lt;chr&gt;, Q33_8 &lt;chr&gt;, Q33_9 &lt;chr&gt;, Q33_10 &lt;chr&gt;,
-## #   Q33_11 &lt;chr&gt;, Q33_12 &lt;chr&gt;, Q33_13 &lt;chr&gt;, Q33_14 &lt;chr&gt;, Q33_15 &lt;chr&gt;,
-## #   Q33_16 &lt;chr&gt;, Q33_17 &lt;chr&gt;, Q33_18 &lt;chr&gt;, Q33_19 &lt;chr&gt;, Q33_20 &lt;chr&gt;,
-## #   Q33_21 &lt;chr&gt;, Q33_22 &lt;chr&gt;, Q33_23 &lt;chr&gt;, Q33_24 &lt;chr&gt;</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">Subject</th>
+<th align="left">StartDate</th>
+<th align="left">Q2</th>
+<th align="left">Q3</th>
+<th align="left">Q4</th>
+<th align="left">Q5</th>
+<th align="left">Q6</th>
+<th align="left">Q7</th>
+<th align="left">Q8#1_1_1</th>
+<th align="left">Q8#2_1_1</th>
+<th align="left">Q9#1_1_1</th>
+<th align="left">Q9#2_1_1</th>
+<th align="left">Q10#1_1_1</th>
+<th align="left">Q10#2_1_1</th>
+<th align="left">Q11#1_1_1</th>
+<th align="left">Q11#2_1_1</th>
+<th align="left">Q12#1_1_1</th>
+<th align="left">Q12#2_1_1</th>
+<th align="left">Q13</th>
+<th align="left">Q14</th>
+<th align="left">Q15#1_1</th>
+<th align="left">Q15#2_1_1</th>
+<th align="left">Q15#2_1_2</th>
+<th align="left">Q16#1_1</th>
+<th align="left">Q16#2_1_1</th>
+<th align="left">Q16#2_1_2</th>
+<th align="left">Q17#1_1</th>
+<th align="left">Q17#2_1_1</th>
+<th align="left">Q17#2_1_2</th>
+<th align="left">Q18#1_1</th>
+<th align="left">Q18#2_1_1</th>
+<th align="left">Q18#2_1_2</th>
+<th align="left">Q19#1_1</th>
+<th align="left">Q19#2_1_1</th>
+<th align="left">Q19#2_1_2</th>
+<th align="left">Q20</th>
+<th align="left">Q21</th>
+<th align="left">Q22</th>
+<th align="left">Q23</th>
+<th align="left">Q24_5</th>
+<th align="left">Q25_1</th>
+<th align="left">Q26_1</th>
+<th align="left">Q27_1</th>
+<th align="left">Q28</th>
+<th align="left">Q29</th>
+<th align="left">Q30</th>
+<th align="left">Q31</th>
+<th align="left">Q32</th>
+<th align="left">Q33_1</th>
+<th align="left">Q33_2</th>
+<th align="left">Q33_3</th>
+<th align="left">Q33_4</th>
+<th align="left">Q33_5</th>
+<th align="left">Q33_6</th>
+<th align="left">Q33_7</th>
+<th align="left">Q33_8</th>
+<th align="left">Q33_9</th>
+<th align="left">Q33_10</th>
+<th align="left">Q33_11</th>
+<th align="left">Q33_12</th>
+<th align="left">Q33_13</th>
+<th align="left">Q33_14</th>
+<th align="left">Q33_15</th>
+<th align="left">Q33_16</th>
+<th align="left">Q33_17</th>
+<th align="left">Q33_18</th>
+<th align="left">Q33_19</th>
+<th align="left">Q33_20</th>
+<th align="left">Q33_21</th>
+<th align="left">Q33_22</th>
+<th align="left">Q33_23</th>
+<th align="left">Q33_24</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Subject</td>
+<td align="left">Start Date</td>
+<td align="left">Today’s Date</td>
+<td align="left">What time did you get into bed last night? (HH:MM)</td>
+<td align="left">What time did you attempt to fall asleep last night? (HH:MM)</td>
+<td align="left">How long (in minutes) did it take you to fall asleep last night?</td>
+<td align="left">What time did you wake up this morning? (HH:MM)</td>
+<td align="left">How many times did you wake up during the night?</td>
+<td align="left">Please list the time and duration of your awakening during the night. - When was the first time you woke up? - Awakening #1 - Time (HH:MM)</td>
+<td align="left">Please list the time and duration of your awakening during the night. - How long (in minutes) were you awake? - Awakening #1 - Minutes</td>
+<td align="left">Please list the time and duration of your awakening during the night. - When was the next time you woke up? - Awakening #2 - Time (HH:MM)</td>
+<td align="left">Please list the time and duration of your awakening during the night. - How long (in minutes) were you awake? - Awakening #2 - Minutes</td>
+<td align="left">Please list the time and duration of your awakening during the night. - When was the next time you woke up? - Awakening #3 - Time (HH:MM)</td>
+<td align="left">Please list the time and duration of your awakening during the night. - How long (in minutes) were you awake? - Awakening #3 - Minutes</td>
+<td align="left">Please list the time and duration of your awakening during the night. - When was the next time you woke up? - Awakening #4 - Time (HH:MM)</td>
+<td align="left">Please list the time and duration of your awakening during the night. - How long (in minutes) were you awake? - Awakening #4 - Minutes</td>
+<td align="left">Please list the time and duration of your awakening during the night. - When was the next time you woke up? - Awakening #5 - Time (HH:MM)</td>
+<td align="left">Please list the time and duration of your awakening during the night. - How long (in minutes) were you awake? - Awakening #5 - Minutes</td>
+<td align="left">How well did you sleep last night?</td>
+<td align="left">How many times did you remove the activity band(s) yesterday?</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Which device? - Watch Off #1</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #1 - Band(s) Off</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #1 - Band(s) On</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Which device? - Watch Off #2</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #2 - Band(s) Off</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #2 - Band(s) On</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Which device? - Watch Off #3</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #3 - Band(s) Off</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #3 - Band(s) On</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Which device? - Watch Off #4</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #4 - Band(s) Off</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #4 - Band(s) On</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Which device? - Watch Off #5</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #5 - Band(s) Off</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #5 - Band(s) On</td>
+<td align="left">How many alcoholic drinks did you consume yesterday?</td>
+<td align="left">How many caffeinated beverages did you consume yesterday?</td>
+<td align="left">Did you take any medication for sleep last night?</td>
+<td align="left">Please list the medication name(s).</td>
+<td align="left">Please use the following scale to answer the question about your mood yesterday. - How sad did you feel yesterday?</td>
+<td align="left">Please use the following scale to answer the question about your mood yesterday. - How happy did you feel yesterday?</td>
+<td align="left">Please use the following scale to answer the question about your mood yesterday. - How stressed did you feel yesterday?</td>
+<td align="left">Please use the following scale to answer the question about your mood yesterday. - How true was the following statement yesterday:</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<p>The same negative thoughts kept going through my mind. How sedentary were you yesterday? Which of the following places did you spend time yesterday? Select all that apply. Approximately how many people did you directly interact with in person yesterday (excluding those you live with)? Which of the following people did you interact with face-to-face (not video chat or on the phone) yesterday? Which of the following people did you interact with on the phone (call, text, video call) or online (direct message, video chat, etc.) yesterday? How many hours did you do each of the following yesterday? - Attending class (in person or remotely) How many hours did you do each of the following yesterday? - Working (in person or remotely) How many hours did you do each of the following yesterday? - Commuting, traveling How many hours did you do each of the following yesterday? - Browsing the internet How many hours did you do each of the following yesterday? - On social media How many hours did you do each of the following yesterday? - Talking with friends or family How many hours did you do each of the following yesterday? - Cooking How many hours did you do each of the following yesterday? - Cleaning How many hours did you do each of the following yesterday? - Exercising, physical activity, sports How many hours did you do each of the following yesterday? - Being outdoors How many hours did you do each of the following yesterday? - Listening to music How many hours did you do each of the following yesterday? - Making art or music How many hours did you do each of the following yesterday? - Playing a card game, board game, or videogames How many hours did you do each of the following yesterday? - Watching TV, movies How many hours did you do each of the following yesterday? - Reading books, magazines How many hours did you do each of the following yesterday? - Studying How many hours did you do each of the following yesterday? - Spiritual or religious activity How many hours did you do each of the following yesterday? - Learning a new skill How many hours did you do each of the following yesterday? - Volunteering How many hours did you do each of the following yesterday? - Napping How many hours did you do each of the following yesterday? - Reading/learning about COVID-19 How many hours did you do each of the following yesterday? - Watching/listening to news about COVID-19 How many hours did you do each of the following yesterday? - Talking/texting/communicating with others about COVID-19 How many hours did you do each of the following yesterday? - Other {“ImportId”:“Subject”} {“ImportId”:“startDate”,“timeZone”:“America/Denver”} {“ImportId”:“QID2_TEXT”} {“ImportId”:“QID6_TEXT”} {“ImportId”:“QID8_TEXT”} {“ImportId”:“QID9_TEXT”} {“ImportId”:“QID59_TEXT”} {“ImportId”:“QID10_TEXT”} {“ImportId”:“QID53#1_1_1”} {“ImportId”:“QID53#2_1_1”} {“ImportId”:“QID55#1_1_1”} {“ImportId”:“QID55#2_1_1”} {“ImportId”:“QID56#1_1_1”} {“ImportId”:“QID56#2_1_1”} {“ImportId”:“QID57#1_1_1”} {“ImportId”:“QID57#2_1_1”} {“ImportId”:“QID58#1_1_1”} {“ImportId”:“QID58#2_1_1”} {“ImportId”:“QID30”} {“ImportId”:“QID32_TEXT”} {“ImportId”:“QID34#1_1”} {“ImportId”:“QID34#2_1_1”} {“ImportId”:“QID34#2_1_2”} {“ImportId”:“QID35#1_1”} {“ImportId”:“QID35#2_1_1”} {“ImportId”:“QID35#2_1_2”} {“ImportId”:“QID36#1_1”} {“ImportId”:“QID36#2_1_1”} {“ImportId”:“QID36#2_1_2”} {“ImportId”:“QID37#1_1”} {“ImportId”:“QID37#2_1_1”} {“ImportId”:“QID37#2_1_2”} {“ImportId”:“QID38#1_1”} {“ImportId”:“QID38#2_1_1”} {“ImportId”:“QID38#2_1_2”} {“ImportId”:“QID40_TEXT”} {“ImportId”:“QID42_TEXT”} {“ImportId”:“QID43”} {“ImportId”:“QID44_TEXT”} {“ImportId”:“QID61_5”} {“ImportId”:“QID63_1”} {“ImportId”:“QID64_1”} {“ImportId”:“QID65_1”} {“ImportId”:“QID46”} {“ImportId”:“QID47”} {“ImportId”:“QID48”} {“ImportId”:“QID49”} {“ImportId”:“QID52”} {“ImportId”:“QID50_1”} {“ImportId”:“QID50_2”} {“ImportId”:“QID50_3”} {“ImportId”:“QID50_4”} {“ImportId”:“QID50_23”} {“ImportId”:“QID50_22”} {“ImportId”:“QID50_5”} {“ImportId”:“QID50_34”} {“ImportId”:“QID50_8”} {“ImportId”:“QID50_9”} {“ImportId”:“QID50_11”} {“ImportId”:“QID50_12”} {“ImportId”:“QID50_14”} {“ImportId”:“QID50_24”} {“ImportId”:“QID50_16”} {“ImportId”:“QID50_19”} {“ImportId”:“QID50_21”} {“ImportId”:“QID50_25”} {“ImportId”:“QID50_26”} {“ImportId”:“QID50_17”} {“ImportId”:“QID50_29”} {“ImportId”:“QID50_30”} {“ImportId”:“QID50_31”} {“ImportId”:“QID50_33”}<br />
+10143 2020-08-29 07:03:13 08/29/2020 22:00 22:35 10 7:48 5 NA NA NA NA NA NA NA NA NA NA Well 1 Fitbit Inspire HR 7:58 8:11 NA NA NA NA NA NA NA NA NA NA NA NA 0 0 No NA 11 72 41 7 Almost always sedentary Home,Restaurant or cafe,Outdoors,Work (non-remote),Vehicle (personal) Less than 5 Co-workers,Friends,Roommates,Significant other Co-workers,Family,Significant other 0 0 Up to 1 hour 1-3 hours 1-3 hours 1-3 hours 1-3 hours Up to 1 hour 0 Up to 1 hour Up to 1 hour 0 1-3 hours 0 0 0 0 0 0 0 0 0 0 0<br />
+10146 2020-08-29 07:06:38 08/29/2020 23:30 01:00 10 07:00 3 02:45 2 03:30 3 05:50 5 NA NA NA NA Mediocre 1 Fitbit Inspire HR 14:10 15:40 NA NA NA NA NA NA NA NA NA NA NA NA 0 0 No NA 20 70 60 20 Equal Home,Friend or family member’s house,Outdoors,Vehicle (public transportation, rideshare) Less than 10 Family,Friends,Roommates,Significant other Significant other 3-7 hours 1-3 hours Up to 1 hour 1-3 hours 3-7 hours 1-3 hours Up to 1 hour Up to 1 hour Up to 1 hour 1-3 hours 1-3 hours 0 0 1-3 hours 0 Up to 1 hour 0 0 0 0 Up to 1 hour Up to 1 hour 0 0<br />
+10149 2020-08-29 07:09:15 08/29/2020 23:43 23:47 4 7:44 1 5:00 2 NA NA NA NA NA NA NA NA Very well 1 Both 19:15 19:15 NA NA NA NA NA NA NA NA NA NA NA NA 0 1 No NA 17 76 37 34 Mostly sedentary, a little active Home,Friend or family member’s house,Work (non-remote),Vehicle (personal) Less than 10 Co-workers,Friends,Significant other Co-workers,Family,Friends 0 7 hours or more Up to 1 hour Up to 1 hour 0 1-3 hours 0 Up to 1 hour Up to 1 hour Up to 1 hour Up to 1 hour 0 1-3 hours 0 0 0 0 0 0 0 0 0 Up to 1 hour 0<br />
+10144 2020-08-29 07:14:35 08/29/2020 22:30 22:45 40 08:00 0 NA NA NA NA NA NA NA NA NA NA Well 1 Both 20:00 20:30 NA NA NA NA NA NA NA NA NA NA NA NA 0 3 No NA 3 68 33 5 Mostly sedentary, a little active Home,Outdoors None NA No one 0 7 hours or more 0 1-3 hours Up to 1 hour 0 1-3 hours 0 0 Up to 1 hour Up to 1 hour 0 0 1-3 hours 0 0 0 0 0 0 Up to 1 hour 0 Up to 1 hour 0</p>
+</div>
 <p>We are also going to create a variable called questions that has what each “Q_” represents in the dataset.</p>
 <pre class="r"><code>questions &lt;- d[1, ]
 questions</code></pre>
-<pre><code>## # A tibble: 1 x 72
-##   Subject StartDate Q2    Q3    Q4    Q5    Q6    Q7    `Q8#1_1_1` `Q8#2_1_1`
-##   &lt;chr&gt;   &lt;chr&gt;     &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;      &lt;chr&gt;     
-## 1 Subject Start Da… Toda… What… What… How … What… How … Please li… Please li…
-## # … with 62 more variables: `Q9#1_1_1` &lt;chr&gt;, `Q9#2_1_1` &lt;chr&gt;,
-## #   `Q10#1_1_1` &lt;chr&gt;, `Q10#2_1_1` &lt;chr&gt;, `Q11#1_1_1` &lt;chr&gt;, `Q11#2_1_1` &lt;chr&gt;,
-## #   `Q12#1_1_1` &lt;chr&gt;, `Q12#2_1_1` &lt;chr&gt;, Q13 &lt;chr&gt;, Q14 &lt;chr&gt;,
-## #   `Q15#1_1` &lt;chr&gt;, `Q15#2_1_1` &lt;chr&gt;, `Q15#2_1_2` &lt;chr&gt;, `Q16#1_1` &lt;chr&gt;,
-## #   `Q16#2_1_1` &lt;chr&gt;, `Q16#2_1_2` &lt;chr&gt;, `Q17#1_1` &lt;chr&gt;, `Q17#2_1_1` &lt;chr&gt;,
-## #   `Q17#2_1_2` &lt;chr&gt;, `Q18#1_1` &lt;chr&gt;, `Q18#2_1_1` &lt;chr&gt;, `Q18#2_1_2` &lt;chr&gt;,
-## #   `Q19#1_1` &lt;chr&gt;, `Q19#2_1_1` &lt;chr&gt;, `Q19#2_1_2` &lt;chr&gt;, Q20 &lt;chr&gt;,
-## #   Q21 &lt;chr&gt;, Q22 &lt;chr&gt;, Q23 &lt;chr&gt;, Q24_5 &lt;chr&gt;, Q25_1 &lt;chr&gt;, Q26_1 &lt;chr&gt;,
-## #   Q27_1 &lt;chr&gt;, Q28 &lt;chr&gt;, Q29 &lt;chr&gt;, Q30 &lt;chr&gt;, Q31 &lt;chr&gt;, Q32 &lt;chr&gt;,
-## #   Q33_1 &lt;chr&gt;, Q33_2 &lt;chr&gt;, Q33_3 &lt;chr&gt;, Q33_4 &lt;chr&gt;, Q33_5 &lt;chr&gt;,
-## #   Q33_6 &lt;chr&gt;, Q33_7 &lt;chr&gt;, Q33_8 &lt;chr&gt;, Q33_9 &lt;chr&gt;, Q33_10 &lt;chr&gt;,
-## #   Q33_11 &lt;chr&gt;, Q33_12 &lt;chr&gt;, Q33_13 &lt;chr&gt;, Q33_14 &lt;chr&gt;, Q33_15 &lt;chr&gt;,
-## #   Q33_16 &lt;chr&gt;, Q33_17 &lt;chr&gt;, Q33_18 &lt;chr&gt;, Q33_19 &lt;chr&gt;, Q33_20 &lt;chr&gt;,
-## #   Q33_21 &lt;chr&gt;, Q33_22 &lt;chr&gt;, Q33_23 &lt;chr&gt;, Q33_24 &lt;chr&gt;</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">Subject</th>
+<th align="left">StartDate</th>
+<th align="left">Q2</th>
+<th align="left">Q3</th>
+<th align="left">Q4</th>
+<th align="left">Q5</th>
+<th align="left">Q6</th>
+<th align="left">Q7</th>
+<th align="left">Q8#1_1_1</th>
+<th align="left">Q8#2_1_1</th>
+<th align="left">Q9#1_1_1</th>
+<th align="left">Q9#2_1_1</th>
+<th align="left">Q10#1_1_1</th>
+<th align="left">Q10#2_1_1</th>
+<th align="left">Q11#1_1_1</th>
+<th align="left">Q11#2_1_1</th>
+<th align="left">Q12#1_1_1</th>
+<th align="left">Q12#2_1_1</th>
+<th align="left">Q13</th>
+<th align="left">Q14</th>
+<th align="left">Q15#1_1</th>
+<th align="left">Q15#2_1_1</th>
+<th align="left">Q15#2_1_2</th>
+<th align="left">Q16#1_1</th>
+<th align="left">Q16#2_1_1</th>
+<th align="left">Q16#2_1_2</th>
+<th align="left">Q17#1_1</th>
+<th align="left">Q17#2_1_1</th>
+<th align="left">Q17#2_1_2</th>
+<th align="left">Q18#1_1</th>
+<th align="left">Q18#2_1_1</th>
+<th align="left">Q18#2_1_2</th>
+<th align="left">Q19#1_1</th>
+<th align="left">Q19#2_1_1</th>
+<th align="left">Q19#2_1_2</th>
+<th align="left">Q20</th>
+<th align="left">Q21</th>
+<th align="left">Q22</th>
+<th align="left">Q23</th>
+<th align="left">Q24_5</th>
+<th align="left">Q25_1</th>
+<th align="left">Q26_1</th>
+<th align="left">Q27_1</th>
+<th align="left">Q28</th>
+<th align="left">Q29</th>
+<th align="left">Q30</th>
+<th align="left">Q31</th>
+<th align="left">Q32</th>
+<th align="left">Q33_1</th>
+<th align="left">Q33_2</th>
+<th align="left">Q33_3</th>
+<th align="left">Q33_4</th>
+<th align="left">Q33_5</th>
+<th align="left">Q33_6</th>
+<th align="left">Q33_7</th>
+<th align="left">Q33_8</th>
+<th align="left">Q33_9</th>
+<th align="left">Q33_10</th>
+<th align="left">Q33_11</th>
+<th align="left">Q33_12</th>
+<th align="left">Q33_13</th>
+<th align="left">Q33_14</th>
+<th align="left">Q33_15</th>
+<th align="left">Q33_16</th>
+<th align="left">Q33_17</th>
+<th align="left">Q33_18</th>
+<th align="left">Q33_19</th>
+<th align="left">Q33_20</th>
+<th align="left">Q33_21</th>
+<th align="left">Q33_22</th>
+<th align="left">Q33_23</th>
+<th align="left">Q33_24</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Subject</td>
+<td align="left">Start Date</td>
+<td align="left">Today’s Date</td>
+<td align="left">What time did you get into bed last night? (HH:MM)</td>
+<td align="left">What time did you attempt to fall asleep last night? (HH:MM)</td>
+<td align="left">How long (in minutes) did it take you to fall asleep last night?</td>
+<td align="left">What time did you wake up this morning? (HH:MM)</td>
+<td align="left">How many times did you wake up during the night?</td>
+<td align="left">Please list the time and duration of your awakening during the night. - When was the first time you woke up? - Awakening #1 - Time (HH:MM)</td>
+<td align="left">Please list the time and duration of your awakening during the night. - How long (in minutes) were you awake? - Awakening #1 - Minutes</td>
+<td align="left">Please list the time and duration of your awakening during the night. - When was the next time you woke up? - Awakening #2 - Time (HH:MM)</td>
+<td align="left">Please list the time and duration of your awakening during the night. - How long (in minutes) were you awake? - Awakening #2 - Minutes</td>
+<td align="left">Please list the time and duration of your awakening during the night. - When was the next time you woke up? - Awakening #3 - Time (HH:MM)</td>
+<td align="left">Please list the time and duration of your awakening during the night. - How long (in minutes) were you awake? - Awakening #3 - Minutes</td>
+<td align="left">Please list the time and duration of your awakening during the night. - When was the next time you woke up? - Awakening #4 - Time (HH:MM)</td>
+<td align="left">Please list the time and duration of your awakening during the night. - How long (in minutes) were you awake? - Awakening #4 - Minutes</td>
+<td align="left">Please list the time and duration of your awakening during the night. - When was the next time you woke up? - Awakening #5 - Time (HH:MM)</td>
+<td align="left">Please list the time and duration of your awakening during the night. - How long (in minutes) were you awake? - Awakening #5 - Minutes</td>
+<td align="left">How well did you sleep last night?</td>
+<td align="left">How many times did you remove the activity band(s) yesterday?</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Which device? - Watch Off #1</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #1 - Band(s) Off</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #1 - Band(s) On</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Which device? - Watch Off #2</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #2 - Band(s) Off</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #2 - Band(s) On</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Which device? - Watch Off #3</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #3 - Band(s) Off</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #3 - Band(s) On</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Which device? - Watch Off #4</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #4 - Band(s) Off</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #4 - Band(s) On</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Which device? - Watch Off #5</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #5 - Band(s) Off</td>
+<td align="left">Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #5 - Band(s) On</td>
+<td align="left">How many alcoholic drinks did you consume yesterday?</td>
+<td align="left">How many caffeinated beverages did you consume yesterday?</td>
+<td align="left">Did you take any medication for sleep last night?</td>
+<td align="left">Please list the medication name(s).</td>
+<td align="left">Please use the following scale to answer the question about your mood yesterday. - How sad did you feel yesterday?</td>
+<td align="left">Please use the following scale to answer the question about your mood yesterday. - How happy did you feel yesterday?</td>
+<td align="left">Please use the following scale to answer the question about your mood yesterday. - How stressed did you feel yesterday?</td>
+<td align="left">Please use the following scale to answer the question about your mood yesterday. - How true was the following statement yesterday:</td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<p>The same negative thoughts kept going through my mind. How sedentary were you yesterday? Which of the following places did you spend time yesterday? Select all that apply. Approximately how many people did you directly interact with in person yesterday (excluding those you live with)? Which of the following people did you interact with face-to-face (not video chat or on the phone) yesterday? Which of the following people did you interact with on the phone (call, text, video call) or online (direct message, video chat, etc.) yesterday? How many hours did you do each of the following yesterday? - Attending class (in person or remotely) How many hours did you do each of the following yesterday? - Working (in person or remotely) How many hours did you do each of the following yesterday? - Commuting, traveling How many hours did you do each of the following yesterday? - Browsing the internet How many hours did you do each of the following yesterday? - On social media How many hours did you do each of the following yesterday? - Talking with friends or family How many hours did you do each of the following yesterday? - Cooking How many hours did you do each of the following yesterday? - Cleaning How many hours did you do each of the following yesterday? - Exercising, physical activity, sports How many hours did you do each of the following yesterday? - Being outdoors How many hours did you do each of the following yesterday? - Listening to music How many hours did you do each of the following yesterday? - Making art or music How many hours did you do each of the following yesterday? - Playing a card game, board game, or videogames How many hours did you do each of the following yesterday? - Watching TV, movies How many hours did you do each of the following yesterday? - Reading books, magazines How many hours did you do each of the following yesterday? - Studying How many hours did you do each of the following yesterday? - Spiritual or religious activity How many hours did you do each of the following yesterday? - Learning a new skill How many hours did you do each of the following yesterday? - Volunteering How many hours did you do each of the following yesterday? - Napping How many hours did you do each of the following yesterday? - Reading/learning about COVID-19 How many hours did you do each of the following yesterday? - Watching/listening to news about COVID-19 How many hours did you do each of the following yesterday? - Talking/texting/communicating with others about COVID-19 How many hours did you do each of the following yesterday? - Other</p>
+</div>
 <pre class="r"><code>d &lt;- d[-(1:2),]</code></pre>
 <p>We can search what question means what using this:</p>
 <pre class="r"><code>questions[1, grep(&quot;sleep&quot;, questions[1,])] # change sleep for other keywords</code></pre>
-<pre><code>## # A tibble: 1 x 4
-##   Q4                     Q5                      Q13           Q22              
-##   &lt;chr&gt;                  &lt;chr&gt;                   &lt;chr&gt;         &lt;chr&gt;            
-## 1 What time did you att… How long (in minutes) … How well did… Did you take any…</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">Q4</th>
+<th align="left">Q5</th>
+<th align="left">Q13</th>
+<th align="left">Q22</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">What time did you attempt to fall asleep last night? (HH:MM)</td>
+<td align="left">How long (in minutes) did it take you to fall asleep last night?</td>
+<td align="left">How well did you sleep last night?</td>
+<td align="left">Did you take any medication for sleep last night?</td>
+</tr>
+</tbody>
+</table>
+</div>
 <p>Now we need to create a new variable called age_group. In this dataset, participants with subject IDs that begin with 1 are young adults, and those with subject IDs that begin with 2 are older adults.</p>
 <pre class="r"><code>d$age_group &lt;- ifelse(d$Subject &lt;= 20000, &quot;Young Adult&quot;, &quot;Older Adult&quot;)
 
 d %&gt;%
   select(Subject, age_group)</code></pre>
-<pre><code>## # A tibble: 143 x 2
-##    Subject    age_group  
-##    &lt;chr&gt;      &lt;chr&gt;      
-##  1 10143      Young Adult
-##  2 10146      Young Adult
-##  3 10149      Young Adult
-##  4 10144      Young Adult
-##  5 10145      Young Adult
-##  6 10140      Young Adult
-##  7 test?Day=2 Older Adult
-##  8 10144      Young Adult
-##  9 10149      Young Adult
-## 10 10146      Young Adult
-## # … with 133 more rows</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">Subject</th>
+<th align="left">age_group</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">10143</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10146</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10149</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10144</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10145</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10140</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">test?Day=2</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10144</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10149</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10146</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10143</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10145</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10140</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10149</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10144</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10146</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10143</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10140</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10145</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10146</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10149</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10143</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10144</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10145</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10140</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10146</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10144</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10143</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10145</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10140</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10149</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10146</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10143</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10144</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10145</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10149</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10140</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10146</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10144</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10145</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10149</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10143</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10140</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10146</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10144</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10143</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10140</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10145</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10149</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10146</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10143</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10145</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10149</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10146</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10143</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10145</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10149</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10146</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10149</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10145</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10146</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10145</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10149</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10148</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10147</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10148</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10147</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10148</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10148</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10147</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10147</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10148</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10147</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10148</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10147</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10148</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10148</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10147</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10147</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10148</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10150</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10147</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10148</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10150</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10148</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10147</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10150</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10150</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10150</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10150</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10150</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10150</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10150</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10150</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10150</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20154</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10159</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10159</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20154</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20154</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20154</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20157</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20142</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20155</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20154</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20157</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20142</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20154</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20157</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20142</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20155</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20155</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20154</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20157</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20142</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20155</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20154</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20157</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20155</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20142</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20154</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20157</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20142</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20155</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20154</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20157</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20142</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20155</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20154</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20157</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20142</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20155</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20157</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20142</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20155</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20142</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20157</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20155</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20157</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20155</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20142</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="even">
+<td align="left">20155</td>
+<td align="left">Older Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">20142</td>
+<td align="left">Older Adult</td>
+</tr>
+</tbody>
+</table>
+</div>
 <pre class="r"><code>## find mean of sleep quality, mood, other measures, grouped by subject
 ## google aggregate means by subject
 d_means &lt;- d %&gt;%
@@ -461,15 +1324,70 @@ d_means$Group &lt;- ifelse(d_means$Subject &lt;= 20000, &quot;Young Adult&quot;,
 
 # get mean
 head(d_means)</code></pre>
-<pre><code>## # A tibble: 6 x 6
-##   Subject stressed_mean ruminate_mean sad_mean happy_mean Group      
-##   &lt;chr&gt;           &lt;dbl&gt;         &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;      
-## 1 10140            14.5          7.62     11.8       78.2 Young Adult
-## 2 10143            27.1          2.4      13.7       64.7 Young Adult
-## 3 10144            36.4          2.25      3.5       62.5 Young Adult
-## 4 10145            43.6         32.1      17.8       58.4 Young Adult
-## 5 10146            49.2         21.2      25         57.5 Young Adult
-## 6 10147            25.7          2.4      46.1       90.6 Young Adult</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">Subject</th>
+<th align="right">stressed_mean</th>
+<th align="right">ruminate_mean</th>
+<th align="right">sad_mean</th>
+<th align="right">happy_mean</th>
+<th align="left">Group</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">10140</td>
+<td align="right">14.50000</td>
+<td align="right">7.62500</td>
+<td align="right">11.75000</td>
+<td align="right">78.25000</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10143</td>
+<td align="right">27.10000</td>
+<td align="right">2.40000</td>
+<td align="right">13.66667</td>
+<td align="right">64.70000</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10144</td>
+<td align="right">36.37500</td>
+<td align="right">2.25000</td>
+<td align="right">3.50000</td>
+<td align="right">62.50000</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10145</td>
+<td align="right">43.58333</td>
+<td align="right">32.08333</td>
+<td align="right">17.75000</td>
+<td align="right">58.41667</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="odd">
+<td align="left">10146</td>
+<td align="right">49.16667</td>
+<td align="right">21.25000</td>
+<td align="right">25.00000</td>
+<td align="right">57.50000</td>
+<td align="left">Young Adult</td>
+</tr>
+<tr class="even">
+<td align="left">10147</td>
+<td align="right">25.70000</td>
+<td align="right">2.40000</td>
+<td align="right">46.10000</td>
+<td align="right">90.60000</td>
+<td align="left">Young Adult</td>
+</tr>
+</tbody>
+</table>
+</div>
 <p>Now we can make plots!</p>
 <pre class="r"><code>### age group differences (boxplots, violin plots)
 
