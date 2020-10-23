@@ -1,0 +1,111 @@
+---
+title: "Mood, Sleep, and Activities Pre vs Post COVID"
+author: "Sarah Parker, Megan McMahon"
+date: "10/23/2020"
+output: html_document
+---
+
+If you don't already have the pacakges below installed, you can install them using `install.packages(packagename)` in the console.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(readr)
+library(tidyverse)
+library(dplyr)
+library(reshape2)
+
+# add more libraries here as needed
+```
+
+## Load Data
+
+```{r cars, echo = FALSE, message = FALSE}
+
+# change the file path to wherever the data file is on your computer
+d <- read_csv("~/Box/CogNeuroLab/Wearables/data/sleep_diaries/qualtrics_sleep_survey.csv")
+
+```
+
+To simplify things, we are going to subset the qualtrics dataset to only contain the date, subject ID, and survey responses. 
+
+```{r}
+
+d <- d %>%
+  select(Subject, StartDate, matches("Q."))
+
+head(d)
+
+```
+
+We are also going to create a variable called questions that has what each "Q_" represents in the dataset.
+
+```{r}
+
+questions <- d[1, ]
+questions
+
+d <- d[-(1:2),]
+```
+
+We can search what question means what using this:
+```{r}
+
+questions[1, grep("sleep", questions[1,])] # change sleep for other keywords
+```
+
+
+Now we need to create a new variable called age_group. In this dataset, participants with subject IDs that begin with 1 are young adults, and those with subject IDs that begin with 2 are older adults.
+
+```{r}
+d$age_group <- ifelse(d$Subject <= 20000, "Young Adult", "Older Adult")
+
+d %>%
+  select(Subject, age_group)
+
+```
+
+
+```{r}
+## find mean of sleep quality, mood, other measures, grouped by subject
+## google aggregate means by subject
+d_means <- d %>%
+  group_by(Subject) %>%
+  summarize(stressed_mean = mean(as.numeric(Q26_1), na.rm = T), 
+            ruminate_mean = mean(as.numeric(Q27_1), na.rm = T), 
+            sad_mean = mean(as.numeric(Q24_5), na.rm = T), 
+            happy_mean = mean(as.numeric(Q25_1), na.rm = T))
+
+d_means$Group <- ifelse(d_means$Subject <= 20000, "Young Adult", "Older Adult")
+
+# get mean
+head(d_means)
+
+```
+
+Now we can make plots!
+
+```{r}
+### age group differences (boxplots, violin plots)
+
+d_means %>%
+  select(-Subject) %>%
+  melt(id.vars = "Group") %>%
+  ggplot(aes(value, group = Group, fill = Group, alpha = 0.75)) +
+    facet_wrap(~ variable, scales = "free", ncol = 2) +
+    geom_density() + 
+  theme_classic() + scale_fill_brewer(palette = "Set1") +
+  ggtitle("Mood by Age Group") + xlab("") + theme(axis.text.x = element_blank())
+
+```
+
+### To Do
+* How to also look at sleep variables with respect to these mood measures? May need to recode the sleep variables
+* Exploratory scatter plots (below)
+* Merge with redcap survey data later on
+
+```{r}
+### scatterplots (sleep vs. mood, activities vs. mood)
+## exploratory analysis on new_df- *google*, remove subject numbers, dates
+```
+
