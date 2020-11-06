@@ -22,28 +22,25 @@ def fitcosinor(data, transform='antilogistic'):
 
     def hillfx(t, actmin, amp, phi, m, g):
         # takes 3 x: min, amp, m
-        bounds = ([0, 0, 0, -np.inf, -np.inf],[2, 2, 24, np.inf, np.inf])
         c = abs(np.cos((t - phi) * (2*np.pi/24)))
         return actmin + amp*(((c+1)**g )/( m**g + (c+1)**g ))
 
     def antilogfx(t, actmin, amp, alpha, beta, phi):
         # takes 5 x: min, amp, alpha, beta, phi
-        bounds = ([0, 0, -np.inf, 0, 0], [2, 2, np.inf, np.inf, 24])
         c = np.cos((t - phi) * (2*np.pi/24))
         return actmin + amp*((np.exp(beta * (c - alpha)))/(1 + np.exp(beta * (c - alpha))))
 
     def arctanfx(t, actmin, amp, alpha, beta, phi):
         # takes 5 x: min, amp, alpha, beta, phi
-        bounds = ([0, 0, -np.inf, 0, 0], [2, 2, np.inf, np.inf, 24])
         c = np.cos((t - phi) * (2*np.pi/24))
         return actmin + amp*(np.arctan(beta * (c - alpha))/(np.pi + (1/2)))
 
     if transform == 'hill':
-        params, fxcov = curve_fit(hillfx, xdata = data.index.values, ydata = data['lmaxact'].values)
+        params, fxcov = curve_fit(hillfx, xdata = data.index.values, ydata = data['lmaxact'].values, bounds = ([0, 0, 0, -np.inf, -np.inf],[2, 2, 24, np.inf, np.inf]))
     elif transform == 'antilogistic':
-        params, fxcov = curve_fit(antilogfx, xdata = data.index.values, ydata = data['lmaxact'].values)
+        params, fxcov = curve_fit(antilogfx, xdata = data.index.values, ydata = data['lmaxact'].values, bounds = ([0, 0, -np.inf, 0, 0], [2, 2, np.inf, np.inf, 24]))
     elif transform == 'arctangent':
-        params, fxcov = curve_fit(arctanfx, xdata = data.index.values, ydata = data['lmaxact'].values)
+        params, fxcov = curve_fit(arctanfx, xdata = data.index.values, ydata = data['lmaxact'].values, bounds = ([0, 0, -np.inf, 0, 0], [2, 2, np.inf, np.inf, 24]))
     else:
         print('invalid transform type; exiting')
 
