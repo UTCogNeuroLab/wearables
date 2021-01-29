@@ -101,8 +101,8 @@ def preproc(in_file, out_dir, device, sr, recording_period_min, interpolate_limi
 
         # truncating to first ndays of data
         if truncate == True:
-            data = data[data.index > start_time +
-                        dt.timedelta(days=recording_period_min) - dt.timedelta(seconds=30)]
+            data = data[data.index > (start_time +
+                        dt.timedelta(days=recording_period_min) - dt.timedelta(seconds=30))]
             end_time = data.last_valid_index()
             period = end_time - start_time
             logging.info('----- truncated recording period')
