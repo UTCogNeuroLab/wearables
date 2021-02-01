@@ -63,6 +63,9 @@ def preproc(in_file, out_dir, device, sr, recording_period_min, interpolate_limi
         data = data.resample(sr).sum()
         data = data['Activity']
 
+        if device == 'fitbit':
+            data = watchoff(record_id, data, in_file, out_dir)
+        
         start_time = data.first_valid_index()
         end_time = data.last_valid_index()
         period = end_time - start_time
