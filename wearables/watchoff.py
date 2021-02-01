@@ -39,5 +39,5 @@ for record_id in fit.keys():
 
     except Exception as e:
         print(e)
-
-return df
+        
+        return df
