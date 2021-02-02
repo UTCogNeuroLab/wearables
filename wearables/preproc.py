@@ -100,8 +100,8 @@ def preproc(in_file, device, sr='1T', truncate=True, write=True, plot=True, reco
 
         # truncating to first ndays of data
         if truncate == True:
-            data = data[data.index <= (start_time +
-                        dt.timedelta(days=recording_period_min) + dt.timedelta(minutes=1))]
+            data = data[data.index <= (start_time + dt.timedelta(seconds=30) +
+                        dt.timedelta(days=recording_period_min))]
             end_time = data.last_valid_index()
             period = end_time - start_time
             logging.info('----- truncated recording period to %s days' % recording_period_min)
@@ -111,10 +111,10 @@ def preproc(in_file, device, sr='1T', truncate=True, write=True, plot=True, reco
             data.to_csv(out_dir + '/truncated/%s_truncated-%s_d.csv' % (record_id, recording_period_min), index=False, index_label=None, header=None, na_rep='NaN')
 
         if plot == True:
-            f, axs = plt.subplots(2, 1)
+            f, axs = plt.subplots(2, 1, sharex=True)
             axs[0].plot(raw.index, raw, color = 'blue')
             axs[0].set_title(record_id + ', ' + str(recording_period_min) + ' days')
-            axs[0].axis('off')
+            axs[0].xaxis.set_visible(False)
 
             axs[1].plot(data.index, data, color = 'red')
             plt.xticks(rotation=45)
