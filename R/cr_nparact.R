@@ -1,18 +1,15 @@
-#fitbit study
-act_raw <- "~/Box/CogNeuroLab/Wearables/data/circadian_measures/raw/actiwatch/"
-fit_raw <- "~/Box/CogNeuroLab/Wearables/data/circadian_measures/raw/fitbit/"
-out <- "~/Box/CogNeuroLab/Wearables/data/circadian_measures/7_days/"
-
 
 truncate_all <- function(in_dir, out_dir, ndays){
   library(lubridate)
   # truncate to number of days desired for recording period
-  for (f in list.files(in_dir)){
-    d <- read_delim(paste0(in_dir, f), delim = " ", col_names = F)
+  for (f in list.files(in_dir, pattern='5*[0-9]_clockfill.csv')){
+    d <- readr::read_delim(paste0(in_dir, f), delim = ",", col_names = F)
     subject <- substr(f, 1, 5)
     start = ymd_hms(tail(d$X1, 1), tz="UTC") - days(ndays)
     d_truncated <- d[d$X1 >= start,]
-    write.table(d_truncated, paste0(out_dir, subject, "_", ndays, "days.txt"), sep = " ", row.names = F, col.names = F)
+    if (! sum(is.na(d_truncated$X2)) > 0){
+      write.table(d_truncated, paste0(out_dir, subject, "_", ndays, "days.txt"), sep = ",", row.names = F, col.names = F)
+    }
   }
 }
 
@@ -204,12 +201,18 @@ calc_cosinor <- function(in_dir, out_dir, device){
   return(results)
 }
 
+#fitbit study
+# act_raw <- "~/Box/CogNeuroLab/Wearables/data/circadian_measures/raw/actiwatch/"
+# fit_raw <- "~/Box/CogNeuroLab/Wearables/data/circadian_measures/raw/fitbit/"
 
+fit_raw <- "~/Box/CogNeuroLab/Wearables/data/fitbit/preproc/clockfill/"
+act_raw <- "~/Box/CogNeuroLab/Wearables/data/actiwatch/preproc/act_files/"
+out <- "~/Box/CogNeuroLab/Wearables/data/circadian_measures/7_days/"
 
 truncate_all(in_dir=act_raw, out_dir=paste0(out_dir, "actiwatch/"), 7)
 calc_nparact(in_dir=paste0(out, "actiwatch/"), out_dir=out, SR=1/60, device = "act")
 calc_cosinor(in_dir=paste0(out, "actiwatch/"), out_dir=out, device = "act")
 
-truncate_all(in_dir=fit_raw, out_dir=paste0(out_dir, "fitbit/"), 7)
-calc_nparact(in_dir=paste0(out, "fitbit/"), out_dir=out, SR=1/60, device = "fit")
+truncate_all(in_dir=fit_raw, out_dir="~/Box/CogNeuroLab/Wearables/data/fitbit/preproc/R/", 7)
+calc_nparact(in_dir="~/Box/CogNeuroLab/Wearables/data/fitbit/preproc/R/", out_dir=out, SR=1/60, device = "fit")
 calc_cosinor(in_dir=paste0(out, "fitbit/"), out_dir=out, device = "fit")

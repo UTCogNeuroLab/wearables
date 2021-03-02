@@ -30,7 +30,7 @@ def preproc(in_file, device, sr='1T', truncate=True, write=True, plot=True, reco
 
         if device == 'actiwatch':
 
-            record_id = os.path.basename(in_file).split("WA_")[1][0:5]
+            record_id = os.path.basename(in_file)[0:5]
 
             with open(in_file) as f:
                 for i, l in enumerate(f):
@@ -52,7 +52,7 @@ def preproc(in_file, device, sr='1T', truncate=True, write=True, plot=True, reco
 
         elif device == 'fitbit':
 
-            record_id = str.split(in_file, "/")[-1][3:8]
+            record_id = os.path.basename(in_file).split("WA_")[1][0:5]
 
             data = pd.read_csv(in_file)
             data.columns = ['Time', 'Activity']
@@ -119,6 +119,9 @@ def preproc(in_file, device, sr='1T', truncate=True, write=True, plot=True, reco
             axs[1].plot(data.index, data, color = 'red')
             plt.xticks(rotation=45)
             plt.tight_layout()
+
+            if not os.path.isdir(out_dir + '/figures/'):
+                os.makedirs(out_dir + '/figures/')
             plt.savefig(out_dir + '/figures/' + record_id + '_' + str(recording_period_min) + '_d_interpolate-' + interpolate_method + '.png', dpi = 300)
 
         if missingNum > 0.10 * len(data):
