@@ -1,0 +1,249 @@
+---
+title: "Sleep Summary Stats Comparison"
+author: "Megan McMahon"
+date: "3/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(tidyverse)
+library(reshape2)
+library(dichromat)
+```
+
+```{r}
+data_dir <- '~/Box/CogNeuroLab/Wearables/data/'
+fit <- read_csv(paste0(data_dir, 'fitbit/fitbitSleepStatsGroup.csv'))
+act <- read_csv(paste0(data_dir, 'actiwatch/wa_act_combined.csv'))
+act_cl <- read_csv(paste0(data_dir, 'actiwatch/actiware_manual_clean/wa_act_combined.csv'))
+
+df_cx <- readr::read_csv(paste0(data_dir, 'df_main.csv'))
+
+head(act)
+```
+
+```{r read}
+
+#clean actiware datasets
+
+clean_actiware_combined_df <- function(df) {
+  TimeInBed <- df %>%
+  filter(interval_type == 'REST') %>%
+  select(subject_id, start_date, duration)
+
+dfnew <- df %>%
+  filter(interval_type == 'SLEEP') %>%
+  merge(TimeInBed, by = c('subject_id', 'start_date')) %>%
+  rename(time_in_bed = duration.y, time_asleep = duration.x) %>%
+  select(-X31, -(number_of_scores:avg_scheduled), -interval_type, -interval_number) %>%
+  mutate(date = format(lubridate::round_date(lubridate::parse_date_time(paste0(start_date, ' ', start_time), '%m/%d/%Y %I:%M:%S %p'), unit = 'd'), '%Y-%m-%d'),
+         joinid = paste0(subject_id, '_', date))
+ 
+return(dfnew) 
+}
+
+act <- clean_actiware_combined_df(act)
+act_cl <- clean_actiware_combined_df(act_cl)
+act
+```
+
+
+```{r}
+#fitbit subject numbers are different for subjects who used Beiwe, so need to match them with their full subject number from Actiware
+match_subject_number <- function(data, pad_digits, match_to){
+    for (i in unique(data$subject[data$subject < 10000])){
+    subno <- data$subject[grep(paste0('[1-2]', stringr::str_pad(i, pad_digits, side = 'left', pad = '0')), match_to)][1]
+    if (! is.na(subno)){
+      data$subject[data$subject == i] <- subno
+    }
+    }
+  return(data)
+}
+fit <- match_subject_number(fit, 4, act$subject_id)
+fit
+```
+
+```{r}
+# match date formats between fitbit and actiwatch datasets
+act_cl <- act_cl %>%
+  mutate(cleaned = ifelse(analysis_name == "Manual", 1, 0))
+
+actall <- act %>%
+  merge(act_cl, by = c('joinid', 'subject_id', 'date'), suffixes = c('_act', '_cl'))
+
+head(actall)
+```
+
+```{r}
+fitnew <- fit %>% 
+  mutate(date = format(lubridate::parse_date_time(StartTime, '%m/%d/%Y %I:%M:%S %p'), format = '%Y-%m-%d'), 
+         joinid = paste0(subject, '_', format(date, format = '%Y-%m-%d'))) %>%
+  rename(time_asleep = TotalMinutesAsleep, time_in_bed = TotalTimeInBed, start_time = StartTime, efficiency = Efficiency, min_after_wake = MinutesAfterWakeup, onset_latency = MinutesToFallAsleep, awake_count = AwakeCount, awake_duration = AwakeDuration, restless_count = RestlessCount, restless_duration = RestlessDuration) %>%
+  select(-X1, -Duration, -MinutesAsleep, -TimeInBed) %>%
+  rename_at(vars(-subject, -date, -joinid), ~ paste0(., '_fit'))
+
+fitnew
+```
+
+
+```{r}
+df <- merge(actall, fitnew, by = 'joinid')
+
+write_csv(df, paste0(data_dir, 'sleep-summary_act-auto_act-cl_fitbit.csv'))
+
+df %>%
+  select(subject, matches('time_asleep'))
+```
+
+```{r}
+df <- merge(df, df_cx, by = 'subject')
+```
+
+```{r}
+exclude = c('10023', '10076', '20182', '20184', '20176', '10151', '10139')
+df <- df[!df$subject %in% exclude, ]
+
+df_means <- df %>%
+  filter(age_group == 1) %>%
+  select(subject_id, analysis_name_cl, where(is.numeric)) %>%
+  group_by(subject, analysis_name_cl) %>%
+  summarise(across(where(is.numeric), ~ mean(.x, na.rm = TRUE)))
+
+```
+
+## Correlations
+
+```{r}
+library(corrr)
+library(purrr)
+library(dplyr)
+
+df %>%
+  group_by(subject) %>%
+  select(where(is.numeric)) %>%
+  group_by(subject) %>%
+  summarise_at(vars(-subject_id), funs(mean(., na.rm=TRUE))) %>%
+  corrr::correlate(method = 'spearman') %>%
+  corrr::focus(matches('time_asleep'), mirror = TRUE) 
+
+```
+
+```{r}
+df %>%
+  group_by(subject) %>%
+  select(where(is.numeric)) %>%
+  group_by(subject) %>%
+  summarise_at(vars(-subject_id), funs(mean(., na.rm=TRUE))) %>%
+  corrr::correlate(method = 'spearman') %>%
+  corrr::focus(matches('bed'), mirror = TRUE) 
+
+```
+
+
+```{r}
+library(RColorBrewer)
+
+df_means %>%
+  ggplot(aes(x = time_asleep_cl, y = time_asleep_fit, color = analysis_name_cl)) +
+  geom_point() +
+  stat_smooth(method = 'lm') +
+  scale_color_brewer(palette = 'Set1')
+
+
+```
+
+```{r}
+df_means %>%
+  ggplot(aes(x = time_in_bed_cl, y = time_in_bed_fit, color = analysis_name_cl)) +
+  geom_point() +
+  stat_smooth(method = 'lm') +
+  scale_color_brewer(palette = 'Set1')
+
+```
+
+```{r}
+# excluded subject 10139
+df_means %>%
+  ggplot(aes(x = time_in_bed_cl)) +
+  geom_boxplot() 
+
+df_means$subject[df_means$time_in_bed_cl > 700]
+```
+
+### Repeated measures correlations
+
+[Documentation](https://cran.r-project.org/web/packages/rmcorr/rmcorr.pdf)
+
+#### Time in Bed
+```{r}
+library(rmcorr)
+colourCount = length(unique(df$subject))
+getPalette = colorRampPalette(brewer.pal(9, "Spectral"))
+
+my.rmc <- rmcorr(participant = subject, measure1 = time_in_bed_act, measure2 = time_in_bed_fit, dataset = df)
+plot(my.rmc, overall = TRUE)
+
+```
+
+```{r}
+ggplot2::ggplot(df, ggplot2::aes(x = time_in_bed_act, y = time_in_bed_fit, group = factor(subject),
+      color = factor(subject))) +
+      ggplot2::geom_point(ggplot2::aes(colour = factor(subject))) +
+      ggplot2::geom_line(ggplot2::aes(y = my.rmc$model$fitted.values), linetype = 1) + xlab('Actiwatch 2.0') + ylab('Fitbit') + ggtitle('Time In Bed') + scale_color_manual(values = getPalette(colourCount)) + labs(color = 'Subject') + ggsave(paste0(data_dir, 'CARE2021/figures/timeinbedrmcorr.png'), height = 5, width = 8, dpi = 300)
+
+```
+
+#### Time in Bed: Cleaned Actiwatch data
+```{r}
+my.rmc <- rmcorr(participant = subject, measure1 = time_in_bed_cl, measure2 = time_in_bed_fit, dataset = df[df$age_group == 1,])
+
+ggplot2::ggplot(df[df$age_group == 1,], ggplot2::aes(x = time_in_bed_cl, y = time_in_bed_fit, group = factor(subject),
+      color = factor(subject))) +
+      ggplot2::geom_point(ggplot2::aes(colour = factor(subject))) +
+      ggplot2::geom_line(ggplot2::aes(y = my.rmc$model$fitted.values), linetype = 1) + xlab('Actiwatch 2.0') + ylab('Fitbit') + ggtitle('Time In Bed') + scale_color_manual(values = getPalette(colourCount)) + labs(color = 'Subject')
+
+```
+#### Time in bed: correlations
+```{r}
+rmcorr(subject, time_in_bed_act, time_in_bed_fit, df)
+rmcorr(subject, time_in_bed_cl, time_in_bed_fit, df)
+
+```
+
+#### Sleep time
+
+```{r}
+my.rmc <- rmcorr(participant = subject, measure1 = time_asleep_act, measure2 = time_asleep_fit, dataset = df)
+
+ggplot2::ggplot(df, ggplot2::aes(x = time_asleep_act, y = time_asleep_fit, group = factor(subject),
+      color = factor(subject))) +
+      ggplot2::geom_point(ggplot2::aes(colour = factor(subject))) +
+      ggplot2::geom_line(ggplot2::aes(y = my.rmc$model$fitted.values), linetype = 1) + xlab('Actiwatch 2.0') + ylab('Fitbit') + ggtitle('Time Asleep') + scale_color_manual(values = getPalette(colourCount)) + labs(color = 'Subject') + ggsave(paste0(data_dir, 'CARE2021/figures/sleeptimermcorr.png'), height = 5, width = 8, dpi = 300)
+
+```
+
+#### Sleep Time: Cleaned Actiwatch data
+
+```{r}
+my.rmc <- rmcorr(participant = subject, measure1 = time_asleep_cl, measure2 = time_asleep_fit, dataset = df[df$age_group == 1,])
+
+ggplot2::ggplot(df[df$age_group == 1,], ggplot2::aes(x = time_asleep_cl, y = time_asleep_fit, group = factor(subject),
+      color = factor(subject))) +
+      ggplot2::geom_point(ggplot2::aes(colour = factor(subject))) +
+      ggplot2::geom_line(ggplot2::aes(y = my.rmc$model$fitted.values), linetype = 1) + xlab('Actiwatch 2.0') + ylab('Fitbit') + ggtitle('Time Asleep') + scale_color_manual(values = getPalette(colourCount)) + labs(color = 'Subject')
+
+```
+
+```{r}
+rmcorr(subject, time_asleep_act, time_asleep_fit, df)
+rmcorr(subject, time_asleep_cl, time_asleep_fit, df)
+
+```
+
+```{r}
+rmcorr(subject, time_asleep_act, time_in_bed_fit, df)
+
+```
+
