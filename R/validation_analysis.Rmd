@@ -1,0 +1,546 @@
+---
+title: "Sleep Summary Stats Comparison"
+author: "Megan McMahon"
+date: "3/12/2021"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+
+library(tidyverse)
+
+data_dir <- '~/Box/CogNeuroLab/Wearables/data/'
+df <- read.csv(paste0(data_dir, 'sleep_stats.csv'))
+
+df <- df %>%
+  mutate(dominant = factor(ifelse(handedness == actiwatch_arm, 1, 0), labels = c("Dominant", "Non-Dominant"))) %>%
+  mutate(age_group = factor(age_group, labels = c("Young Adults", "Older Adults")), 
+         handedness = factor(handedness, levels = c("Left", "Right", "Both")),
+         actiwatch_arm = factor(actiwatch_arm, levels = c("Left", "Right")))
+         
+df %>%
+  select(subject, age_group, handedness, actiwatch_arm, dominant) %>%
+  head()
+
+```
+
+## Only  keep bed and wake times that are closest (not nap times)
+Fitbit is reporting multiple bed times for every given Actiwatch bed time for many subjects.
+
+```{r}
+d0 <- df
+df <- d0 %>%
+  drop_na(age_group, subject) %>%
+  mutate(subject = as.factor(subject),
+         tdif = abs(difftime(bed_time_act, bed_time_fit, units = "m")),
+         joinid = paste(subject, join_date)) %>%
+  group_by(joinid) %>%
+  arrange(tdif) %>%
+  slice(1)
+
+```
+
+Exclude participants' second runs if they did the study twice
+
+```{r}
+df <- df %>%
+  group_by(subject) %>%
+  arrange(join_date) %>%
+  mutate(lag_time = difftime(join_date, lag(join_date), units = "days")) %>%
+  mutate(arm = ifelse(lag_time > 7, "2", NA)) %>%
+  arrange(subject) %>%
+  fill(arm, .direction = "down") %>%
+  mutate(arm = replace_na(arm, 1)) %>%
+  ungroup() %>%
+  filter(arm == 1)
+
+# how many subjects have fewer than 5 days of sleep statistics reported?
+df %>%
+  select(subject, join_date, bed_time_act, bed_time_fit) %>%
+  group_by(subject) %>%
+  summarise(n_act = sum((!is.na(bed_time_fit) & !is.na(bed_time_act)))) %>%
+  filter(n_act < 5) 
+
+df %>%
+  select(subject, bed_time_act, bed_time_fit) %>%
+  filter(subject == "10014")
+
+```
+Maybe didn't sync data at the end of the study?
+
+## How many left handers?
+```{r}
+df %>%
+  select(subject, age_group, dominant) %>%
+  group_by(age_group, dominant) %>%
+  distinct(subject, keep_all = T) %>%
+  drop_na(age_group) %>%
+  summarise(n = n())
+
+df %>%
+  filter(handedness == "Right") %>%
+  select(subject, age_group, dominant) %>%
+  group_by(age_group, dominant) %>%
+  distinct(subject, keep_all = T) %>%
+  drop_na(age_group) %>%
+  summarise(n = n())
+
+df %>%
+  filter(handedness == "Left") %>%
+  select(subject, age_group, dominant) %>%
+  group_by(age_group, dominant) %>%
+  distinct(subject, keep_all = T) %>%
+  drop_na(age_group) %>%
+  summarise(n = n())
+
+```
+
+
+```{r}
+#exclude = c('10023', '10076', '20182', '20184', '20176', '10151', '10139', 
+#            '23', '76', '182', '184', '176', '151', '139') 
+
+# I think these subjects are being excluded because of missingness/not wearing the watch, but I need to check the jupyter notebook to make sure. For now, not going to exclude because there are so many.
+
+# df %>%
+#   filter(!subject %in% exclude) %>%
+#   select(subject) %>%
+#   distinct()
+
+```
+
+### Repeated measures correlations
+
+[Documentation](https://cran.r-project.org/web/packages/rmcorr/rmcorr.pdf)
+
+[Repeated Measures Correlation, Bakdash1 and Marusich, 2017](https://www.frontiersin.org/articles/10.3389/fpsyg.2017.00456/full)
+
+#### Time in Bed
+```{r}
+library(rmcorr)
+library(RColorBrewer)
+
+colourCount = length(unique(df$subject))
+getPalette = colorRampPalette(brewer.pal(9, "Spectral"))
+
+dfcor <- df %>%
+  drop_na(sleep_duration_act, sleep_duration_fit)
+
+my.rmc <- rmcorr(participant = subject, measure1 = time_in_bed_act, measure2 = time_in_bed_fit, dataset = dfcor)
+my.rmc 
+
+```
+
+```{r}
+df %>%
+  ggplot() +
+  geom_histogram(aes(x = tdif, fill = age_group)) +
+  facet_wrap(~ age_group) +
+  scale_fill_brewer(palette = "Set1", name = "Age Group") +
+  xlab("Difference in Bed Times Across Devices in Minutes") + ylab("Count")
+
+```
+
+```{r}
+dfcor %>%
+  ggplot(aes(x = time_in_bed_act, y = time_in_bed_fit, group = subject,
+             color = subject)) +
+  geom_point(aes(colour = subject)) +
+  geom_line(aes(y = my.rmc$model$fitted.values), linetype = 1) + 
+  xlab('Actiwatch 2.0') + ylab('Fitbit') + 
+  ggtitle('Time In Bed') + 
+  scale_color_manual(values = getPalette(colourCount)) + 
+  labs(color = 'Subject')
+
+```
+#### Time in bed: correlations
+```{r}
+#raw
+rmcorr(subject, time_in_bed_act, time_in_bed_fit, df)
+rmcorr(subject, time_in_bed_act, time_in_bed_fit, filter(df, handedness == 2))
+rmcorr(subject, time_in_bed_act, time_in_bed_fit, filter(df, (actiwatch_arm == 1) & (handedness == 2)))
+rmcorr(subject, time_in_bed_act, time_in_bed_fit, filter(df, (actiwatch_arm == 2) & (handedness == 2)))
+
+```
+
+#### Sleep time
+
+```{r}
+
+my.rmc <- rmcorr(participant = subject, measure1 = sleep_duration_act, measure2 = sleep_duration_fit, dataset = dfcor)
+my.rmc
+
+dfcor %>% 
+  ggplot(aes(x = sleep_duration_act, y = sleep_duration_fit, group = subject,
+             color = subject)) +
+  geom_point(aes(colour = subject)) +
+  geom_line(aes(y = my.rmc$model$fitted.values), linetype = 1) + 
+  xlab('Actiwatch 2.0') + ylab('Fitbit') + 
+  ggtitle('Sleep Duration') + 
+  scale_color_manual(values = getPalette(colourCount)) + 
+  labs(color = 'Subject')
+
+```
+
+### Efficiency
+
+```{r}
+my.rmc <- rmcorr(participant = subject, measure1 = efficiency_act, measure2 = efficiency_fit, dataset = dfcor)
+my.rmc
+
+dfcor %>% 
+  ggplot(aes(x = efficiency_act, y = efficiency_fit, group = subject,
+             color = subject)) +
+  geom_point(aes(color = subject)) +
+  geom_line(aes(y = my.rmc$model$fitted.values), linetype = 1) + 
+  xlab('Actiwatch 2.0') + ylab('Fitbit') + 
+  ggtitle('Sleep Efficiency') + 
+  scale_color_manual(values = getPalette(colourCount)) + 
+  labs(color = 'Subject')
+
+```
+
+### Next steps: 
+Need correlation value for each subject, then see how that's related to measures of subjective sleep quality, handedness, arm assignment, percent watch off, beiwe, fitbit device
+
+```{r}
+corrdf <- dfcor %>%
+  group_by(subject) %>%
+  summarize(sleep_duration_r = cor(sleep_duration_act, sleep_duration_fit, method = 'spearman'), 
+            time_in_bed_r = cor(time_in_bed_act, time_in_bed_fit, method = 'spearman'))
+
+dfcor <- merge(df, corrdf, by = 'subject')
+
+head(corrdf)
+
+```
+
+## How many subjects have r values less than 0.5 for sleep duration and time in bed?
+
+```{r}
+unique(dfcor$subject[dfcor$time_in_bed_r < 0.5])
+length(unique(dfcor$subject[dfcor$time_in_bed_r < 0.5]))
+
+unique(dfcor$subject[dfcor$sleep_duration_r < 0.5])
+length(unique(dfcor$subject[dfcor$sleep_duration_r < 0.5]))
+
+```
+
+
+```{r}
+require(gridExtra)
+
+plot1 <- dfcor %>%
+  ggplot() + 
+  geom_boxplot(aes(x = fitbit_device, y = sleep_duration_r, fill = fitbit_device, group = fitbit_device)) +
+  ylab('Sleep Duration Correlation (r)') +
+  scale_fill_brewer(palette = 'Set1') + theme(axis.text.x = element_text(angle = 90))
+
+plot2 <- dfcor %>%
+  ggplot() + 
+  geom_boxplot(aes(x = fitbit_device, y = time_in_bed_r, fill = fitbit_device, group = fitbit_device)) +
+  ylab('Time In Bed Correlation (r)') +
+  scale_fill_brewer(palette = 'Set1') + theme(axis.text.x = element_text(angle = 90))
+
+pnew <- arrangeGrob(plot1, plot2, ncol=2)
+ggsave("~/Box/CogNeuroLab/Wearables/results/fitbit_device.png", pnew, height = 5, width = 10, units = "in")
+
+plot(pnew)
+
+```
+
+```{r}
+plot1 <- dfcor %>%
+  filter(handedness != "Both") %>%
+  ggplot() + 
+  geom_boxplot(aes(x = handedness, y = sleep_duration_r, fill = handedness, group = handedness)) +
+  ylab('Sleep Time Correlation (r)') + xlab('Handedness') +
+  scale_fill_brewer(palette = 'Set1') 
+
+plot2 <- dfcor %>%
+  filter(handedness != "Both") %>%
+  ggplot() + 
+  geom_boxplot(aes(x = handedness, y = time_in_bed_r, fill = handedness, group = handedness)) +
+  ylab('Time In Bed Correlation (r)') + xlab('Handedness') +
+  scale_fill_brewer(palette = 'Set1')
+
+pnew <- arrangeGrob(plot1, plot2, ncol=2)
+ggsave("~/Box/CogNeuroLab/Wearables/results/handedness.png", pnew, height = 5, width = 10, units = "in")
+
+plot(pnew)
+```
+
+```{r}
+
+plot1 <- dfcor %>%
+  filter(handedness != "Both") %>%
+  ggplot() + 
+  geom_boxplot(aes(x = actiwatch_arm, y = sleep_duration_r, fill = actiwatch_arm, group = actiwatch_arm)) +
+  ylab('Sleep Time Correlation (r)') +
+  scale_fill_brewer(palette = 'Set1') + xlab("Actiwatch Arm")
+
+plot2 <- dfcor %>%
+  filter(handedness != "Both") %>%
+  ggplot() + 
+  geom_boxplot(aes(x = actiwatch_arm, y = time_in_bed_r, fill = actiwatch_arm, group = actiwatch_arm)) +
+  ylab('Time In Bed Correlation (r)') +
+  scale_fill_brewer(palette = 'Set1') + xlab("Actiwatch Arm")
+
+pnew <- arrangeGrob(plot1, plot2, ncol=2)
+ggsave("~/Box/CogNeuroLab/Wearables/results/actiwatchassignment.png", pnew, height = 5, width = 10, units = "in")
+
+plot(pnew)
+
+```
+
+```{r}
+
+plot1 <- dfcor %>%
+  filter(handedness != "Both") %>%
+  ggplot() + 
+  geom_boxplot(aes(x = dominant, y = sleep_duration_r, fill = dominant, group = dominant)) +
+  ylab('Sleep Time Correlation (r)') +
+  scale_fill_brewer(palette = 'Set1') + xlab("Actiwatch Arm")
+
+plot2 <- dfcor %>%
+  filter(handedness != "Both") %>%
+  ggplot() + 
+  geom_boxplot(aes(x = dominant, y = time_in_bed_r, fill = dominant, group = dominant)) +
+  ylab('Time In Bed Correlation (r)') +
+  scale_fill_brewer(palette = 'Set1') + xlab("Actiwatch Arm")
+
+pnew <- arrangeGrob(plot1, plot2, ncol=2)
+ggsave("~/Box/CogNeuroLab/Wearables/results/actiwatchassignment_dominant.png", pnew, height = 5, width = 10, units = "in")
+
+plot(pnew)
+```
+
+```{r}
+plot1 <- dfcor %>%
+  ggplot() + 
+  geom_boxplot(aes(x = age_group, y = sleep_duration_r, fill = age_group, group = age_group)) +
+  ylab('Sleep Time Correlation (r)') +
+  scale_fill_brewer(palette = 'Set1') + xlab("Age Group")
+
+plot2 <- dfcor %>%
+  ggplot() + 
+  geom_boxplot(aes(x = age_group, y = time_in_bed_r, fill = age_group, group = age_group)) +
+  ylab('Time In Bed Correlation (r)') +
+  scale_fill_brewer(palette = 'Set1') + xlab("Age Group")
+
+pnew <- arrangeGrob(plot1, plot2, ncol=2)
+ggsave("~/Desktop/agegroup.png", pnew, height = 5, width = 10, units = "in")
+
+plot(pnew)
+
+```
+
+## Bland Altman plots
+
+About the package: [blandr](https://cran.r-project.org/web/packages/blandr/vignettes/introduction.html)
+Interpretation: [Statology](https://www.statology.org/bland-altman-plot/)
+
+e.g.
+
+The average of the values in the Difference column turns out to be 0.5. (middle line)
+The standard deviation of values in the Difference column turns out to be 1.235.
+The upper and lower limits of the confidence interval for the average difference can be calculated as:
+
+Upper Limit: x + 1.96*s = 0.5 + 1.96*1.235 = 2.92
+Lower Limit: x – 1.96*s = 0.5 – 1.96*1.235 = -1.92
+
+On average, instrument A weighs frogs to be 0.5 grams heavier than instrument B.
+95% of the differences in weight between the two instruments are expected to fall in the range of -1.92 grams and 2.92 grams.
+
+First look at which device may be under or over estimating
+- Fitbit underestimating sleep time and time in bed
+
+```{r}
+
+# fitbit underestimating sleep time
+df %>%
+  ggplot(aes(x = sleep_duration_act, y = sleep_duration_fit)) +
+  geom_point() + 
+  stat_smooth(method = "lm")
+
+#fitbit underestimating time in bed
+df %>%
+  ggplot(aes(x = time_in_bed_act, y = time_in_bed_fit)) +
+  geom_point() + 
+  stat_smooth(method = "lm")
+
+```
+
+```{r}
+library(blandr)
+
+df.stats <- blandr.statistics(df$sleep_duration_act , df$sleep_duration_fit)
+p1 <- blandr.draw(df$sleep_duration_act , df$sleep_duration_fit ) + ggtitle(paste("Raw Actiwatch, \n bias=", signif(df.stats$bias, 4), "lower=", signif(df.stats$lowerLOA, 4), "upper=", signif(df.stats$upperLOA, 4)))
+
+df.stats <- blandr.statistics(df$sleep_duration_cl , df$sleep_duration_fit)
+p2 <- blandr.draw(df$sleep_duration_cl , df$sleep_duration_fit) + ggtitle(paste("Cleaned Actiwatch, \n bias=", signif(df.stats$bias, 4), "lower=", signif(df.stats$lowerLOA, 4), "upper=", signif(df.stats$upperLOA, 4)))
+
+df.stats <- blandr.statistics(df$sleep_duration_act[(df$actiwatch_arm == 1) & (df$handedness == 2)] , df$sleep_duration_fit[(df$actiwatch_arm == 1) & (df$handedness == 2)])
+p3 <- blandr.draw(df$sleep_duration_act[(df$actiwatch_arm == 1) & (df$handedness == 2)] , df$sleep_duration_fit[(df$actiwatch_arm == 1) & (df$handedness == 2)]) + ggtitle(paste("Raw, RH, Non-Dominant, \n \n bias=", signif(df.stats$bias, 4), "lower=", signif(df.stats$lowerLOA, 4), "upper=", signif(df.stats$upperLOA, 4)))
+
+df.stats <- blandr.statistics(df$sleep_duration_act[(df$actiwatch_arm == 2) & (df$handedness == 2)] , df$sleep_duration_fit[(df$actiwatch_arm == 2) & (df$handedness == 2)])
+p4 <- blandr.draw(df$sleep_duration_act[(df$actiwatch_arm == 2) & (df$handedness == 2)] , df$sleep_duration_fit[(df$actiwatch_arm == 2) & (df$handedness == 2)]) + ggtitle(paste("Raw, RH, Dominant, \n bias=", signif(df.stats$bias, 4), "lower=", signif(df.stats$lowerLOA, 4), "upper=", signif(df.stats$upperLOA, 4)))
+
+df.stats <- blandr.statistics(df$sleep_duration_cl[(df$actiwatch_arm == 1) & (df$handedness == 2)] , df$sleep_duration_fit[(df$actiwatch_arm == 1) & (df$handedness == 2)])
+p5 <- blandr.draw(df$sleep_duration_cl[(df$actiwatch_arm == 1) & (df$handedness == 2)] , df$sleep_duration_fit[(df$actiwatch_arm == 1) & (df$handedness == 2)]) + ggtitle(paste("Cleaned, RH, Non-Dominant, \n bias=", signif(df.stats$bias, 4), "lower=", signif(df.stats$lowerLOA, 4), "upper=", signif(df.stats$upperLOA, 4)))
+
+df.stats <- blandr.statistics(df$sleep_duration_cl[(df$actiwatch_arm == 2) & (df$handedness == 2)] , df$sleep_duration_fit[(df$actiwatch_arm == 2) & (df$handedness == 2)])
+p6 <- blandr.draw(df$sleep_duration_cl[(df$actiwatch_arm == 2) & (df$handedness == 2)] , df$sleep_duration_fit[(df$actiwatch_arm == 2) & (df$handedness == 2)]) + ggtitle(paste("Cleaned, RH, Dominant, \n bias=", signif(df.stats$bias, 4), "lower=", signif(df.stats$lowerLOA, 4), "upper=", signif(df.stats$upperLOA, 4)))
+
+gridExtra::grid.arrange(p1, p2, p3, p4, p5, p6, nrow=3, ncol=2)
+
+pall <- gridExtra::arrangeGrob(p1, p2, p3, p4, p5, p6, nrow=3, ncol=2)
+
+ggsave("~/Box/CogNeuroLab/Wearables/results/sleep_duration_bland_altman.png", pall, scale = 1.5, dpi = 300)
+```
+
+```{r}
+library(blandr)
+
+df.stats <- blandr.statistics(df$time_in_bed_act , df$time_in_bed_fit)
+p1 <- blandr.draw(df$time_in_bed_act , df$time_in_bed_fit ) + ggtitle(paste("Raw Actiwatch, \n bias=", signif(df.stats$bias, 4), "lower=", signif(df.stats$lowerLOA, 4), "upper=", signif(df.stats$upperLOA, 4)))
+
+df.stats <- blandr.statistics(df$time_in_bed_cl , df$time_in_bed_fit)
+p2 <- blandr.draw(df$time_in_bed_cl , df$time_in_bed_fit) + ggtitle(paste("Cleaned Actiwatch, \n bias=", signif(df.stats$bias, 4), "lower=", signif(df.stats$lowerLOA, 4), "upper=", signif(df.stats$upperLOA, 4)))
+
+df.stats <- blandr.statistics(df$time_in_bed_act[(df$actiwatch_arm == 1) & (df$handedness == 2)] , df$time_in_bed_fit[(df$actiwatch_arm == 1) & (df$handedness == 2)])
+p3 <- blandr.draw(df$time_in_bed_act[(df$actiwatch_arm == 1) & (df$handedness == 2)] , df$time_in_bed_fit[(df$actiwatch_arm == 1) & (df$handedness == 2)]) + ggtitle(paste("Raw, RH, Non-Dominant, \n bias=", signif(df.stats$bias, 4), "lower=", signif(df.stats$lowerLOA, 4), "upper=", signif(df.stats$upperLOA, 4)))
+
+df.stats <- blandr.statistics(df$time_in_bed_act[(df$actiwatch_arm == 2) & (df$handedness == 2)] , df$time_in_bed_fit[(df$actiwatch_arm == 2) & (df$handedness == 2)])
+p4 <- blandr.draw(df$time_in_bed_act[(df$actiwatch_arm == 2) & (df$handedness == 2)] , df$time_in_bed_fit[(df$actiwatch_arm == 2) & (df$handedness == 2)]) + ggtitle(paste("Raw, RH, Dominant, \n bias=", signif(df.stats$bias, 4), "lower=", signif(df.stats$lowerLOA, 4), "upper=", signif(df.stats$upperLOA, 4)))
+
+df.stats <- blandr.statistics(df$time_in_bed_cl[(df$actiwatch_arm == 1) & (df$handedness == 2)] , df$time_in_bed_fit[(df$actiwatch_arm == 1) & (df$handedness == 2)])
+p5 <- blandr.draw(df$time_in_bed_cl[(df$actiwatch_arm == 1) & (df$handedness == 2)] , df$time_in_bed_fit[(df$actiwatch_arm == 1) & (df$handedness == 2)]) + ggtitle(paste("Cleaned, RH, Non-Dominant, \n bias=", signif(df.stats$bias, 4), "lower=", signif(df.stats$lowerLOA, 4), "upper=", signif(df.stats$upperLOA, 4)))
+
+df.stats <- blandr.statistics(df$time_in_bed_cl[(df$actiwatch_arm == 2) & (df$handedness == 2)] , df$time_in_bed_fit[(df$actiwatch_arm == 2) & (df$handedness == 2)])
+p6 <- blandr.draw(df$time_in_bed_cl[(df$actiwatch_arm == 2) & (df$handedness == 2)] , df$time_in_bed_fit[(df$actiwatch_arm == 2) & (df$handedness == 2)]) + ggtitle(paste("Cleaned, RH, Dominant, \n bias=", signif(df.stats$bias, 4), "lower=", signif(df.stats$lowerLOA, 4), "upper=", signif(df.stats$upperLOA, 4)))
+
+gridExtra::grid.arrange(p1, p2, p3, p4, p5, p6, nrow=3, ncol=2)
+
+pall <- gridExtra::arrangeGrob(p1, p2, p3, p4, p5, p6, nrow=3, ncol=2)
+
+ggsave("~/Box/CogNeuroLab/Wearables/results/time_in_bed_bland_altman.png", pall, scale = 1.5, dpi = 300)
+```
+
+## Correspondance with Sleep Diary Data
+
+```{r, include = FALSE, echo = FALSE}
+
+diary <- read_csv(paste0(data_dir, 'sleep_diaries/sleep_diaries_all.csv')) 
+
+diary <- diary %>%
+  mutate_at(vars(contains("time")), ~as.POSIXct(., tz = "UTC", format = '%Y-%m-%d %H:%M')) %>%
+  mutate(date = as_date(timestamp, tz = "UTC")) %>% # this is the date they filled it out but if they forgot to complete the diary the morning after and instead completed it a day later, this will be wrong
+  rename(subject = record_id) %>%
+  mutate(subject = as.character(subject)) %>%
+  group_by(subject) %>%
+  arrange(timestamp) %>%
+  mutate(lag_time = difftime(timestamp, lag(timestamp), units = "days")) %>%
+  mutate(arm = ifelse(lag_time > 7, "2", NA)) %>%
+  arrange(subject) %>%
+  fill(arm, .direction = "down") %>%
+  mutate(arm = replace_na(arm, 1)) %>%
+  ungroup() %>%
+  filter(arm == 1)
+
+head(diary)
+
+```
+
+```{r}
+participant = "10038"
+
+df %>%
+  mutate_at(vars(contains("bed_time")), ~as.POSIXct(., tz = "UTC", format = '%Y-%m-%d %H:%M')) %>%
+  mutate_at(vars(contains("wake_time")), ~as.POSIXct(., tz = "UTC", format = '%Y-%m-%d %H:%M')) %>%
+  group_by(subject) %>%
+  filter(subject == participant) %>%
+  select(bed_time_act, bed_time_fit)
+  
+```
+
+
+```{r}
+library(scales)
+
+act_files <- list.files("~/Box/CogNeuroLab/Wearables/data/actiwatch/act_files/preproc/", full.names = T)
+
+dfn <- df %>%
+  mutate_at(vars(contains("bed_time")), ~as.POSIXct(., tz = "UTC", format = '%Y-%m-%d %H:%M')) %>%
+  mutate_at(vars(contains("wake_time")), ~as.POSIXct(., tz = "UTC", format = '%Y-%m-%d %H:%M')) %>%
+  mutate(date = as_date(wake_time_act, tz = "UTC")) %>%
+  rename(event_name = interval_number_act) %>%
+  group_by(subject) %>%
+  arrange(date) %>%
+  distinct(bed_time_act, .keep_all = TRUE) %>%
+  merge(diary, by = c('subject', 'event_name'), all = T) %>%
+  arrange(subject, event_name)
+
+check <- dfn %>%
+  select(subject, event_name, bed_time, bed_time_act, bed_time_fit, wake_time, wake_time_act, wake_time_fit)
+
+check
+```
+
+```{r}
+
+for (participant in unique(df$subject)){
+  
+  if (length(act_files[grep(participant, act_files)]) > 0){
+    rawact <-
+      read_csv(act_files[grep(participant, act_files)], col_names = c("date", "activity"))
+    
+    rawact <- rawact %>%
+      group_by(format(ymd_hms(date), "%Y-%m-%d"), lubridate::hour(lubridate::ymd_hms(date))) %>%
+      summarize(activity = sum(activity))
+    
+    colnames(rawact) <- c("date", "time", "activity")
+    
+    rawact <- rawact %>%
+      mutate(datetime = as.POSIXct(paste(date, str_pad(paste0(time, ":00:00"), width = 8, pad = "0")), tz = "UTC", format = "%Y-%m-%d %H:%M:%S"))
+    
+    try(dfn %>%
+    filter(subject == participant) %>%
+    ggplot() +
+    geom_line(data = rawact, aes(x = datetime, y = activity)) +
+    geom_vline(aes(xintercept = bed_time_act, color = 'Actiwatch', linetype = 'dotted')) +
+    geom_vline(aes(xintercept = wake_time_act, color = 'Actiwatch', linetype = 'dotted')) +
+    geom_vline(aes(xintercept = bed_time_fit, color = 'Fitbit', linetype = 'longdash')) +
+    geom_vline(aes(xintercept = wake_time_fit, color = 'Fitbit', linetype = 'longdash')) +
+    geom_vline(aes(xintercept = bed_time, color = "Self-Report", linetype = 'dashed')) +
+    geom_vline(aes(xintercept = wake_time, color = "Self-Report", linetype = 'dashed')) +
+    theme_minimal() + 
+    scale_x_datetime(breaks = date_breaks("3 hours"), minor_breaks=date_breaks("1 hour"), labels=date_format("%H")) +
+    facet_wrap( ~ date, scales = "free_x") + 
+    guides(alpha = F, size = F, linetype = F) +
+    scale_color_discrete(name = "Method") + xlab("Time") + ylab("Activity") +
+    ggsave(paste0("~/Box/CogNeuroLab/Wearables/results/diary_comparison/", participant, ".pdf"), dpi = 400),
+    silent = T)
+    
+  }
+  
+}
+
+write.csv(select(dfn, subject, age_group, actiwatch_arm, handedness, fitbit_device, bed_time, bed_time_act, bed_time_fit, wake_time, wake_time_act, wake_time_fit),"~/Box/CogNeuroLab/Wearables/data/sleep_diaries/bed-wake-time-comparison.csv", row.names = F)
+
+```
+
+```{r}
+
+dfn <- dfn %>%
+  mutate(sleep_duration_diary = as.numeric(difftime(wake_time, bed_time, units = "m")))
+
+rmcorr(participant = subject, measure1 = sleep_duration_diary, measure2 = sleep_duration_act, dataset = dfn)
+rmcorr(participant = subject, measure1 = sleep_duration_diary, measure2 = sleep_duration_fit, dataset = dfn)
+
+```
+
+

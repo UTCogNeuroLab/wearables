@@ -1,10 +1,15 @@
 README.md
 setup.py
 wearables/__init__.py
+wearables/beiwe_fitbit.py
+wearables/clockfill.py
 wearables/fitcosinor.py
+wearables/metrics.py
+wearables/npmetrics.py
 wearables/plotcosinor.py
 wearables/preproc.py
 wearables/readactig.py
+wearables/watchoff.py
 wearables.egg-info/PKG-INFO
 wearables.egg-info/SOURCES.txt
 wearables.egg-info/dependency_links.txt
