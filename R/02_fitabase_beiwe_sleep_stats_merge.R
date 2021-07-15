@@ -1,3 +1,5 @@
+library(tidyverse)
+library(lubridate)
 
 data_dir <- "~/Box/CogNeuroLab/Wearables/data/"
 fitabase <- read.csv(paste0(data_dir, "fitbit/Fitabase_sleep_all.csv"))
@@ -12,11 +14,13 @@ head(beiwe)
 
 fitabase <- fitabase %>%
   mutate(BedTime = ymd_hms(mdy_hms(BedTime)),
-         WakeTime = ymd_hms(WakeTime))
+         WakeTime = ymd_hms(WakeTime),
+         platform = "Fitabase")
 
 beiwe <- beiwe %>%
   mutate(BedTime = ymd_hms(BedTime),
-         WakeTime = ymd_hms(WakeTime)) 
+         WakeTime = ymd_hms(WakeTime),
+         platform = "Beiwe") 
 
 d <- fitabase %>%
   select(colnames(fitabase)[colnames(fitabase) %in% colnames(beiwe)]) %>%
