@@ -1,13 +1,15 @@
+import os
+import sys
+from datetime import date
+import pandas as pd
+import datetime as dt
+import logging
+import glob
+from wearables import watchoff
+import matplotlib.pyplot as plt
+
 def preproc(in_file, device, sr='1T', truncate=True, write=True, plot=True, recording_period_min=7, interpolate_limit=10, interpolate_method='linear'):
-    import os
-    import sys
-    from datetime import date
-    import pandas as pd
-    import datetime as dt
-    import logging
-    import glob
-    from wearables import watchoff
-    import matplotlib.pyplot as plt
+
 
     data = []
 
@@ -30,7 +32,7 @@ def preproc(in_file, device, sr='1T', truncate=True, write=True, plot=True, reco
 
         if device == 'actiwatch':
 
-            record_id = os.path.basename(in_file)[0:5]
+            record_id = os.path.basename(in_file).str.split('_')[0] # check this
 
             with open(in_file) as f:
                 for i, l in enumerate(f):
@@ -70,7 +72,7 @@ def preproc(in_file, device, sr='1T', truncate=True, write=True, plot=True, reco
         if device == 'fitbit':
             data = watchoff.watchoff(record_id, data, in_file, out_dir)
 
-        start_time = data.first_valid_index()
+        start_time = data.first_valid_index() # TO DO: find first non-zero activity value
         end_time = data.last_valid_index()
         period = end_time - start_time
 
@@ -84,7 +86,7 @@ def preproc(in_file, device, sr='1T', truncate=True, write=True, plot=True, reco
         if missingNum > 0:
             # remove trailing and leading activity values
             length_init = len(data)
-            data = data.loc[data.first_valid_index():data.last_valid_index()]
+            data = data.loc[start_time:end_time]
 
             logging.info('----- removed leading and trailing NaN activity values')
             missingNum = data.isnull().sum()
@@ -95,7 +97,7 @@ def preproc(in_file, device, sr='1T', truncate=True, write=True, plot=True, reco
             logging.info('----- interpolated with %s, limit = %s' % (interpolate_method, interpolate_limit))
             if not os.path.isdir(out_dir + '/interpolated/'):
                 os.makedirs(out_dir + '/interpolated/')
-            data.to_csv(out_dir + '/interpolated/%s_interpolated-method-%s_lim-%s-epoch.csv' % (record_id, interpolate_method, interpolate_limit), index=False, index_label=None, header=None, na_rep='NaN')
+            data.to_csv(out_dir + '/interpolated/%s_interpolated-method-%s_lim-%s-epoch.csv' % (record_id, interpolate_method, interpolate_limit), index=True, index_label=None, header=None, na_rep='NaN')
             missingNum = data.isnull().sum()
 
         # truncating to first ndays of data
@@ -108,7 +110,7 @@ def preproc(in_file, device, sr='1T', truncate=True, write=True, plot=True, reco
             missingNum = data.isnull().sum()
             if not os.path.isdir(out_dir + '/truncated/'):
                 os.makedirs(out_dir + '/truncated/')
-            data.to_csv(out_dir + '/truncated/%s_truncated-%s_d.csv' % (record_id, recording_period_min), index=False, index_label=None, header=None, na_rep='NaN')
+            data.to_csv(out_dir + '/truncated/%s_truncated-%s_d.csv' % (record_id, recording_period_min), index=True, index_label=None, header=None, na_rep='NaN')
 
         if plot == True:
             f, axs = plt.subplots(2, 1, sharex=True)
