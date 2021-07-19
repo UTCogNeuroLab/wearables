@@ -18,8 +18,7 @@ def watchoff(record_id, data, in_file, out_dir):
         missingValue = 0
         hr = pd.read_csv(hrFile, index_col='Time', parse_dates=True)
 
-        df = pd.merge(data, hr, left_on='Time',
-                      right_on='Time', left_index=True)
+        df = pd.merge(data, hr, on='Time')
 
         df['Activity'][df['Value'] == 0] = np.nan
 

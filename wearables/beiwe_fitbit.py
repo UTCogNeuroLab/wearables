@@ -36,6 +36,7 @@ for fileName in beiweFiles:
             dfStart = df['activities_heart'].first_valid_index()
             dfEnd = df['activities_heart'].last_valid_index()
             dfNew = df.loc[dfStart:dfEnd]
+            dfNew.columns = ['Time', 'Activity']
 
             # save out to lab data directory
             dfNew.to_csv(outDataDir + 'WA_' + fileName.split('data/')[1].split('-')[0] + '.csv')

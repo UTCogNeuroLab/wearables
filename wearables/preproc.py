@@ -1,22 +1,30 @@
-import os
-import sys
-from datetime import date
-import pandas as pd
-import datetime as dt
-import logging
-import glob
-from wearables import watchoff
-import matplotlib.pyplot as plt
-
-def preproc(in_file, device, sr='1T', truncate=True, write=True, plot=True, recording_period_min=7, interpolate_limit=10, interpolate_method='linear'):
-
+def preproc(in_file, device, sr='1T', truncate=True, write=True, plot=True, recording_period_min=7, interpolate_method='linear', interpolate_limit=10):
+    import os
+    import sys
+    from datetime import date
+    import pandas as pd
+    import datetime as dt
+    import logging
+    import glob
+    import matplotlib.pyplot as plt
+    from wearables import watchoff
+    import numpy as np
+    # in_file is _New_Analysis.csv raw Actiware export
+    # device is either 'actiwatch' or 'fitbit'
+    # sr is 1T for 1 minute, 0.5T for 30 seconds, etc.
+    # truncate will take the first n days of Data
+    # write writes out csv files for each of the preprocessing steps (truncate, interpolate)
+    # plot generates plots comparing the raw data to the preprocessed Data
+    # recording period min specifies the number of days to truncate to/minimum days of activity Data
+    # interpolate limit is number of epochs to interpolate (1T with interpolate_limit=10 is 10 min, 0.5T with interpolate_limit=20 is 10 min)
+    # interpolate method defaults to linear
 
     data = []
 
     try:
         today = date.today()
 
-        out_dir = os.path.dirname(in_file) + '/preproc/'
+        out_dir = os.path.dirname(in_file) + '/preproc_%s/' % today
 
         if not os.path.isdir(out_dir):
             os.mkdir(out_dir)
@@ -32,7 +40,7 @@ def preproc(in_file, device, sr='1T', truncate=True, write=True, plot=True, reco
 
         if device == 'actiwatch':
 
-            record_id = os.path.basename(in_file).str.split('_')[0] # check this
+            record_id = str(os.path.basename(in_file)).split('_')[0]
 
             with open(in_file) as f:
                 for i, l in enumerate(f):
@@ -71,90 +79,100 @@ def preproc(in_file, device, sr='1T', truncate=True, write=True, plot=True, reco
 
         if device == 'fitbit':
             data = watchoff.watchoff(record_id, data, in_file, out_dir)
+            start_time = data.first_valid_index()
+            end_time = data.last_valid_index()
+            print(data[start_time-dt.timedelta(minutes=1):start_time])
+            print(data[end_time:end_time+dt.timedelta(minutes=1)])
 
-        start_time = data.first_valid_index() # TO DO: find first non-zero activity value
-        end_time = data.last_valid_index()
+        elif device == 'actiwatch':
+            start_time = data.index[np.nonzero(data.values)[0][0]]
+            end_time = data.index[np.nonzero(data.values)[0][-1]]
+
         period = end_time - start_time
 
         raw = data
-        raw.to_csv(out_dir + '/' + record_id + '.csv', index=True, index_label=None, header=None, na_rep='NaN')
 
         missingNum = data.isnull().sum()
         error = 0
         logging.info('%s processing' % record_id)
 
-        if missingNum > 0:
-            # remove trailing and leading activity values
-            length_init = len(data)
-            data = data.loc[start_time:end_time]
-
+        if not in_file.endswith('_beiwe.csv'):
+            data = data[start_time:end_time]
             logging.info('----- removed leading and trailing NaN activity values')
-            missingNum = data.isnull().sum()
 
-        if missingNum > 0:
-            # interpolate
-            data.interpolate(method=interpolate_method, limit=interpolate_limit, inplace=True, limit_area='inside')
-            logging.info('----- interpolated with %s, limit = %s' % (interpolate_method, interpolate_limit))
-            if not os.path.isdir(out_dir + '/interpolated/'):
-                os.makedirs(out_dir + '/interpolated/')
-            data.to_csv(out_dir + '/interpolated/%s_interpolated-method-%s_lim-%s-epoch.csv' % (record_id, interpolate_method, interpolate_limit), index=True, index_label=None, header=None, na_rep='NaN')
-            missingNum = data.isnull().sum()
+        print('%s missing %s values out of %s total (%.2f percent)' % (record_id, data.isnull().sum(), len(data), data.isnull().sum()/len(data)*100))
 
-        # truncating to first ndays of data
-        if truncate == True:
-            data = data[data.index <= (start_time + dt.timedelta(seconds=30) +
-                        dt.timedelta(days=recording_period_min))]
-            end_time = data.last_valid_index()
-            period = end_time - start_time
-            logging.info('----- truncated recording period to %s days' % recording_period_min)
-            missingNum = data.isnull().sum()
-            if not os.path.isdir(out_dir + '/truncated/'):
-                os.makedirs(out_dir + '/truncated/')
-            data.to_csv(out_dir + '/truncated/%s_truncated-%s_d.csv' % (record_id, recording_period_min), index=True, index_label=None, header=None, na_rep='NaN')
-
-        if plot == True:
-            f, axs = plt.subplots(2, 1, sharex=True)
-            axs[0].plot(raw.index, raw, color = 'blue')
-            axs[0].set_title(record_id + ', ' + str(recording_period_min) + ' days')
-            axs[0].xaxis.set_visible(False)
-
-            axs[1].plot(data.index, data, color = 'red')
-            plt.xticks(rotation=45)
-            plt.tight_layout()
-
-            if not os.path.isdir(out_dir + '/figures/'):
-                os.makedirs(out_dir + '/figures/')
-            plt.savefig(out_dir + '/figures/' + record_id + '_' + str(recording_period_min) + '_d_interpolate-' + interpolate_method + '.png', dpi = 300)
-
-        if missingNum > 0.10 * len(data):
+        if missingNum > 0.20 * len(data):
             print('----- error: missing values = %.2f percent' %
                   (100*(missingNum / len(data))))
             logging.warning(
-                '----- discard: missing more than 10 percent of data, %.2f percent missing' % (missingNum / len(data)))
+                '----- discard: missing more than 10 percent of data, %.2f percent missing' % (missingNum / len(data)*100))
             error = error + 1
 
-        if period < dt.timedelta(days=recording_period_min):
-            print('----- error: less than %s days actigraphy data - recording period is %s ' %
-                  (str(recording_period_min), str(period)))
-            logging.warning('----- discard: insufficient recording period %s' %
-                            (str(period)))
-            error = error + 1
-
-        if missingNum > 0:
-            print('... error: after processing, still missing %.2f percent data' %
-                  (100*(missingNum/len(data))))
-            logging.warning(
-                '----- error: missing %.2f percent after processing' % (100*(missingNum/len(data))))
-            error = error + 1
-
-        if error == 0:
-            logging.info('----- success: %.2f percent NaN, %s recording period' %
-                         (100*(missingNum / len(data)), str(period)))
-
-            print('----- success: %.2f percent NaN, %s recording period' %
-                  (100*(missingNum / len(data)), str(period)))
         else:
-            print('----- exclude from analysis')
+            if missingNum > 0:
+                new_data = data.interpolate(method=interpolate_method, limit=interpolate_limit, inplace=True, limit_area='inside')
+                data.update(new_data)
+                logging.info('----- interpolated with %s, limit = %s' % (interpolate_method, interpolate_limit))
+                if not os.path.isdir(out_dir + '/interpolated/'):
+                    os.makedirs(out_dir + '/interpolated/')
+                data.to_csv(out_dir + '/interpolated/%s_%s-d_interpolated-method-%s_lim-%s-epoch.csv' % (record_id, recording_period_min, interpolate_method, interpolate_limit), index=True, index_label=None, header=None, na_rep='NaN')
+                missingNum = data.isnull().sum()
+
+            print('interpolated - now missing %s values out of %s total (%s percent)' % (data.isnull().sum(), len(data), data.isnull().sum()/len(data)*100))
+
+            # truncating to first ndays of data
+            if truncate == True:
+                data = data[data.index <= (start_time + dt.timedelta(seconds=30) +
+                            dt.timedelta(days=recording_period_min))]
+                end_time = data.last_valid_index()
+                period = end_time - start_time
+                logging.info('----- truncated recording period to %s days' % recording_period_min)
+                missingNum = data.isnull().sum()
+                if not os.path.isdir(out_dir + '/truncated/'):
+                    os.makedirs(out_dir + '/truncated/')
+                data.to_csv(out_dir + 'truncated/%s_interpolated_truncated-%s-d.csv' % (record_id, recording_period_min), index=True, index_label=None, header=None, na_rep='NaN')
+                print(missingNum)
+
+            if plot == True:
+                f, axs = plt.subplots(2, 1, sharex=True)
+                axs[0].plot(raw.index, raw, color = 'blue')
+                axs[0].set_title(record_id + ', ' + str(recording_period_min) + ' days')
+                axs[0].xaxis.set_visible(False)
+
+                axs[1].plot(data.index, data, color = 'red')
+                plt.xticks(rotation=45)
+                plt.tight_layout()
+
+                if not os.path.isdir(out_dir + '/figures/'):
+                    os.makedirs(out_dir + '/figures/')
+                plt.savefig(out_dir + '/figures/' + record_id + '_' + str(recording_period_min) + '_d_interpolate-' + interpolate_method + '.png', dpi = 300)
+                plt.close()
+
+            if period < dt.timedelta(days=recording_period_min):
+                print('----- error: less than %s days actigraphy data - recording period is %s ' %
+                      (str(recording_period_min), str(period)))
+                logging.warning('----- discard: insufficient recording period %s' %
+                                (str(period)))
+                error = error + 1
+
+            if missingNum > 0:
+                print('... error: after processing, still missing %.2f percent data' %
+                      (100*(missingNum/len(data))))
+                logging.warning(
+                    '----- error: missing %.2f percent after processing' % (100*(missingNum/len(data))))
+                error = error + 1
+
+            if error == 0:
+                logging.info('----- success: %.2f percent NaN, %s recording period' %
+                             (100*(missingNum / len(data)), str(period)))
+
+                print('----- success: %.2f percent NaN, %s recording period' %
+                      (100*(missingNum / len(data)), str(period)))
+            else:
+                print('----- exclude from analysis')
+
+            data.to_csv(out_dir + '/' + record_id + '_%s-d.csv' % recording_period_min, index=True, index_label=None, header=None, na_rep='NaN')
 
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()

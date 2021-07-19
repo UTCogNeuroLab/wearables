@@ -731,6 +731,7 @@ rmcorr(participant = subject, measure1 = sleep_duration_diary, measure2 = sleep_
 for (subject_file in list.files(path = paste0(data_dir, "actiwatch/act_files/preproc/"), full.names = T, pattern = "*.csv")){
   act <- read.csv(subject_file, )
   print(paste0(substring(basename(subject_file), 0, 5), " duration is ", difftime(act[length(act[,1]),1], act[1,1]), " days"))
+  
 }
 
 ```
