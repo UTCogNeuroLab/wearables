@@ -1,0 +1,25 @@
+---
+title: "rar"
+author: "Megan McMahon"
+date: "7/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+```{r}
+library(nparACT)
+
+data_dir <- '/Volumes/schnyer/Megan/Wearables/data'
+cr <- c()
+results <- c()
+
+for (file in list.files(paste0(data_dir, '/actiwatch/act_files/preproc_2021-07-19/'), pattern = "_7-d.csv", full.names = T)[2:3]){
+  d <- read.csv(file, header = FALSE)
+  cr <- nparACT::nparACT_base("d", SR = 60/60, fulldays = TRUE)
+}
+```
+

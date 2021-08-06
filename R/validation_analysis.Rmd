@@ -14,8 +14,9 @@ library(tidyverse)
 library(tableone)
 library(xtable)
 
-data_dir <- '~/Box/CogNeuroLab/Wearables/data/'
-results_dir <- '~/Box/CogNeuroLab/Wearables/results/'
+# data_dir <- '~/Box/CogNeuroLab/Wearables/data/'
+data_dir <- '/Volumes/schnyer/Megan/Wearables/data/'
+results_dir <- '/Volumes/schnyer/Megan/Wearables/results/'
 df <- read.csv(paste0(data_dir, "sleep_stats.csv"))
 redcap <- read.csv(paste0(data_dir, "WearableAssessment_DATA_2021-07-12_1250.csv"))
 
