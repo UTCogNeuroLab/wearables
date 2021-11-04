@@ -68,11 +68,11 @@ def _lmx(data, period, lowest=True):
     mean_activity = avgdailycyclic.rolling(period * 60).mean()
 
     if lowest:
-        t_start = mean_activity.idxmin().values
+        t_start = mean_activity.idxmin().dropna().values
     else:
-        t_start = mean_activity.idxmax().values
+        t_start = mean_activity.idxmax().dropna().values
 
-    lmx = float(mean_activity.loc[t_start].values)
+    lmx = float(mean_activity.loc[t_start].dropna().values)
 
     return t_start, lmx
 
@@ -91,6 +91,7 @@ def relative_amplitude(data):
 
 
 def np_metrics_all(data):
+
     IS = interdaily_stability(data)
     IV = intradaily_variability(data)
     RA = relative_amplitude(data)

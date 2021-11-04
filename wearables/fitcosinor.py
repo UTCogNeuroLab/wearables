@@ -45,6 +45,7 @@ def fitcosinor(data, transform='antilogistic'):
         print('invalid transform type; exiting')
 
     paramsdf = pd.DataFrame(params[None], columns =  [['actmin', 'amp', 'alpha', 'beta', 'phi']])
+    print(paramsdf)
 
     x = data.index.values
     y = data['lmaxact'].values

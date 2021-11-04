@@ -248,9 +248,10 @@ Need correlation value for each subject, then see how that's related to measures
 ```{r}
 corrdf <- dfcor %>%
   group_by(subject) %>%
-  summarize(sleep_duration_r = cor(sleep_duration_act_manual, sleep_duration_fit_manual, method = 'spearman'), 
+  summarise(sleep_duration_r = cor(sleep_duration_act, sleep_duration_fit, method = 'spearman', use = "everything"), 
             time_in_bed_r = cor(time_in_bed_act, time_in_bed_fit, method = 'spearman'))
-
+  
+dfcor$sleep_duration_fit
 dfcor <- merge(df, corrdf, by = 'subject')
 
 head(corrdf)
@@ -385,7 +386,7 @@ plot(pnew)
 plot1 <- dfcor %>%
   ggplot() + 
   geom_boxplot(aes(x = age_group, y = sleep_duration_r, fill = age_group, group = age_group)) +
-  ylab('Sleep Time Correlation (r)') +
+  ylab('Sleep Duration Correlation (r)') +
   scale_fill_brewer(palette = 'Set1') + xlab("Age Group")
 
 plot2 <- dfcor %>%
@@ -734,6 +735,31 @@ for (subject_file in list.files(path = paste0(data_dir, "actiwatch/act_files/pre
   print(paste0(substring(basename(subject_file), 0, 5), " duration is ", difftime(act[length(act[,1]),1], act[1,1]), " days"))
   
 }
+
+```
+```{r}
+d1 <- read_csv(paste0(data_dir, 'dataset_2021-08-06.csv'))
+d2 <- read_csv(paste0(data_dir, "sleep_diaries/sleep_diaries_all.csv"))
+
+d2$sleep_quality <- recode(d2$sleep_quality, "Very poor" = '1', 'Poorly' = '2', 'Mediocre' = '3', 'Well' = '4', 'Very well' = '5')
+d2$sleep_quality <- as.numeric(d2$sleep_quality)
+
+d2 <- d2 %>%
+  select(record_id, sleep_quality) %>%
+  group_by(record_id) %>%
+  summarise(sleep_quality_mean = mean(sleep_quality, na.rm = T), sleep_quality_sd = sd(sleep_quality, na.rm = T))
+  
+d3 <- merge(d1, d2, by.x = 'subject', by.y = 'record_id')
+
+library(tidyverse)
+
+
+d3 %>%
+  filter(age_group == 1) %>%
+  select(contains('7_fit_norm'), mean) %>%
+  mutate_all(as.numeric) %>%
+  corrr::correlate() %>%
+  corrr::rplot() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 ```
 

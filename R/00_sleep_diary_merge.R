@@ -1,10 +1,14 @@
 library(readr)
 library(stringr)
+library(tidyverse)
 
 redcap <- read_csv("~/Box/CogNeuroLab/Wearables/data/sleep_diaries/WearableAssessment-SleepSurveys_DATA_2021-06-24_1200.csv")
 qualtrics <- read_csv("~/Box/CogNeuroLab/Wearables/data/sleep_diaries/qualtrics_sleep_survey.csv", col_names= F)
 
 colnames(qualtrics) <- qualtrics[2,]
+
+qcols <- as.data.frame(colnames(qualtrics))
+rcols <- as.data.frame(colnames(redcap))
 
 qualtrics_n <- qualtrics %>%
   rename(record_id = Subject,
@@ -25,7 +29,8 @@ qualtrics_n <- qualtrics %>%
          awakening5_length = `Please list the time and duration of your awakening during the night. - How long (in minutes) were you awake? - Awakening #5 - Minutes`,
          wake_time = `What time did you wake up this morning? (HH:MM)`,
          sleep_quality = `How well did you sleep last night?`,
-         n_watch_off = `How many times did you remove the activity band(s) yesterday?`) %>%
+         n_watch_off = `How many times did you remove the activity band(s) yesterday?`,
+         watch_off_1 = `Please list the times you removed the activity band(s) yesterday. - Time Band(s) Off/On (HH:MM) - Watch Off #1 - Band(s) Off`) %>% # TO DO: add watch off times
   filter(!grepl('test|Subject', record_id)) %>%
   filter(!grepl('ImportI', record_id)) %>%
   mutate_at(vars(ends_with("time")), ~paste0(str_pad(., width = 5, pad = "0"), ":00"), ~na_if(., "NA:00")) %>%
@@ -48,7 +53,8 @@ qualtrics_n <- qualtrics %>%
          awakening5_length,
          wake_time,
          sleep_quality,
-         n_watch_off) %>%
+         n_watch_off,
+         watch_off_1) %>%
   mutate_all(as.character) %>%
   group_by(record_id) %>%
   mutate(event_name = row_number()) %>%
@@ -152,4 +158,5 @@ d %>%
   select(bed_time, sleep_time, wake_time) %>%
   head()
 
-write.csv(d, '~/Box/CogNeuroLab/Wearables/data/sleep_diaries/sleep_diaries_all.csv', row.names = F)
+#changed name
+write.csv(d, '~/Box/CogNeuroLab/Wearables/data/sleep_diaries/sleep_diaries_activity_all.csv', row.names = F)
