@@ -130,11 +130,11 @@ def preproc(in_file, device, sr='1T', start_time_csv='None', end_time_csv='None'
                     end_time = pd.to_datetime(end_time[1])
 
                 else:
-                    
+
                     start_time = pd.to_datetime(start_time[0])
                     end_time = pd.to_datetime(end_time[0])
 
-            period = int(((end_time - start_time)/np.timedelta64(1, 'D')))
+        period = int(((end_time - start_time)/np.timedelta64(1, 'D')))
 
         if period < recording_period_min:
             print('----- error: less than %s days actigraphy data - recording period is %s ' %
